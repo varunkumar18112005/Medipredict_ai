@@ -1,0 +1,82 @@
+name: DevSecOps Defensive Security Review & SAST Scan
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    name: Automated SAST & Dependency Security Audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17 (Java Spring Boot)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Node.js (Frontend & Mobile)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python (ML Service)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run Gitleaks Secret Scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Run Semgrep SAST Scan
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/default
+        continue-on-error: true
+
+      - name: Run Trivy Filesystem Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          output: 'trivy-report.txt'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+        continue-on-error: true
+
+      - name: Audit Node.js Dependencies (web-frontend)
+        run: |
+          cd web-frontend
+          npm audit --json > node-audit-web.json || true
+        continue-on-error: true
+
+      - name: Audit Node.js Dependencies (medipredict_ai_frontend)
+        run: |
+          cd medipredict_ai_frontend
+          npm audit --json > node-audit-mobile.json || true
+        continue-on-error: true
+
+      - name: Upload Security Artifacts & Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-reports
+          path: |
+            trivy-report.txt
+            web-frontend/node-audit-web.json
+            medipredict_ai_frontend/node-audit-mobile.json
+            Vulnerability Test Results/
