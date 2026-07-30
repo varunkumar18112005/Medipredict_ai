@@ -1,0 +1,15 @@
+{
+  "name": "selenium-tests",
+  "version": "1.0.0",
+  "description": "Selenium WebDriver E2E Test Suite for MediPredict AI Web Application",
+  "main": "tests/login-tests.js",
+  "scripts": {
+    "test": "node tests/login-tests.js",
+    "report": "node generate_excel_report.js"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.18.0",
+    "chromedriver": "^122.0.0",
+    "xlsx": "^0.18.5"
+  }
+}
