@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Expo / React Native
+.expo/
+.expo-shared/
+*.orig.*
+
+# Python / ML
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# Java / Maven / Gradle
+target/
+.gradle/
+build/
+*.class
+*.jar
+*.war
+
+# Logs & Crashes
+*.log
+hs_err_pid*.log
+replay_pid*.log
+
+# IDEs & System
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+ip.txt
+ip_sunday.txt
+tunnel.txt
+website_screenshots/
+stitch_screens/
+download_screens.py

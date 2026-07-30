@@ -1,0 +1,14 @@
+src/navigation/AppNavigator.tsx(4,26): error TS2307: Cannot find module '@expo/vector-icons' or its corresponding type declarations.
+src/screens/AnalyzingScreen.tsx(3,26): error TS2307: Cannot find module '@expo/vector-icons' or its corresponding type declarations.
+src/screens/DiseaseSelectionScreen.tsx(4,26): error TS2307: Cannot find module '@expo/vector-icons' or its corresponding type declarations.
+src/screens/HealthAnalysisScreen.tsx(3,26): error TS2307: Cannot find module '@expo/vector-icons' or its corresponding type declarations.
+src/screens/HealthAnalysisScreen.tsx(92,55): error TS2694: Namespace '"C:/Users/ASUS/OneDrive/Desktop/pdd/medipredict_ai_frontend/node_modules/expo-document-picker/build/index"' has no exported member 'DocumentAsset'.
+src/screens/HistoryScreen.tsx(3,26): error TS2307: Cannot find module '@expo/vector-icons' or its corresponding type declarations.
+src/screens/HomeScreen.tsx(4,26): error TS2307: Cannot find module '@expo/vector-icons' or its corresponding type declarations.
+src/screens/LoginScreen.tsx(3,26): error TS2307: Cannot find module '@expo/vector-icons' or its corresponding type declarations.
+src/screens/ProfileScreen.tsx(3,26): error TS2307: Cannot find module '@expo/vector-icons' or its corresponding type declarations.
+src/screens/RegisterScreen.tsx(3,26): error TS2307: Cannot find module '@expo/vector-icons' or its corresponding type declarations.
+src/screens/ReportsScreen.tsx(4,26): error TS2307: Cannot find module '@expo/vector-icons' or its corresponding type declarations.
+src/screens/ResultScreen.tsx(3,26): error TS2307: Cannot find module '@expo/vector-icons' or its corresponding type declarations.
+src/screens/SuggestionsScreen.tsx(3,26): error TS2307: Cannot find module '@expo/vector-icons' or its corresponding type declarations.
+src/services/api.ts(49,36): error TS2339: Property 'multiRemove' does not exist on type 'AsyncStorage'.

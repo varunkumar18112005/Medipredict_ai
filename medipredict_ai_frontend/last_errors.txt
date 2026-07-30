@@ -1,0 +1,1 @@
+src/navigation/AppNavigator.tsx(69,20): error TS2552: Cannot find name 'getStyles'. Did you mean 'styles'?

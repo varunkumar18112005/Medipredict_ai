@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16
+    container_name: medipredict-db
+    environment:
+      POSTGRES_DB: medipredict_db
+      POSTGRES_USER: medipredict
+      POSTGRES_PASSWORD: medipredict123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medipredict -d medipredict_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Machine Learning Microservice (FastAPI)
+  ml-service:
+    build: ./ML_Service
+    container_name: medipredict-ml
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  # Spring Boot Application
+  backend:
+    build: ./Backend
+    container_name: medipredict-backend
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/medipredict_db
+      - DB_USERNAME=medipredict
+      - DB_PASSWORD=medipredict123
+      - APP_ML_SERVICE_URL=http://ml-service:8000
+      - JWT_SECRET=mysupersecretkey12345678901234567890
+      - CORS_ORIGINS=*
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ml-service:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

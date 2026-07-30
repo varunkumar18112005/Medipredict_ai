@@ -1,0 +1,370 @@
+{
+  "DIABETES": {
+    "0": {
+      "level": "Normal/Low Risk",
+      "symptoms": ["None typically present at this stage."],
+      "recommended_tests": ["Annual Fasting Blood Glucose", "HbA1c test during regular checkups"],
+      "medications": ["None required."],
+      "diet_suggestions": ["Maintain a high-fiber diet.", "Incorporate complex carbohydrates and lean proteins.", "Stay hydrated."],
+      "lifestyle_changes": ["Engage in 150 minutes of moderate aerobic exercise per week.", "Maintain a healthy BMI."],
+      "preventive_measures": ["Avoid excessive consumption of processed sugars.", "Regular health screenings."],
+      "follow_up": ["Routine annual physical examination."],
+      "emergency_warnings": ["Unusual thirst", "Frequent urination", "Unexplained weight loss"]
+    },
+    "1": {
+      "level": "Prediabetes/Moderate Risk",
+      "symptoms": ["Increased thirst", "Fatigue", "Frequent urination"],
+      "recommended_tests": ["Oral Glucose Tolerance Test (OGTT)", "HbA1c test every 6 months"],
+      "medications": ["Metformin may be considered by a physician for high-risk individuals."],
+      "diet_suggestions": ["Strictly avoid refined sugars and sweetened beverages.", "Focus on the Mediterranean or DASH diet.", "Control portion sizes."],
+      "lifestyle_changes": ["Aim for 5-7% weight loss if overweight.", "Increase daily physical activity (e.g., brisk walking)."],
+      "preventive_measures": ["Monitor blood glucose periodically.", "Reduce stress and ensure adequate sleep."],
+      "follow_up": ["Consult a primary care physician every 6 months."],
+      "emergency_warnings": ["Blurred vision", "Tingling in hands or feet"]
+    },
+    "2": {
+      "level": "High Risk / Early Diabetes",
+      "symptoms": ["Persistent fatigue", "Blurred vision", "Slow-healing sores"],
+      "recommended_tests": ["Fasting Blood Sugar", "HbA1c every 3-6 months", "Lipid profile", "Kidney function tests"],
+      "medications": ["Oral hypoglycemic agents (e.g., Metformin, Sulfonylureas) as prescribed."],
+      "diet_suggestions": ["Carbohydrate counting.", "High intake of non-starchy vegetables.", "Strict meal timing."],
+      "lifestyle_changes": ["Strict weight management.", "Daily aerobic and resistance training.", "Cessation of smoking if applicable."],
+      "preventive_measures": ["Daily foot inspection.", "Annual eye exam."],
+      "follow_up": ["Consult an endocrinologist every 3 months."],
+      "emergency_warnings": ["Extreme fatigue", "Nausea and vomiting", "Fruity breath odor"]
+    },
+    "3": {
+      "level": "Critical Risk / Advanced Diabetes",
+      "symptoms": ["Severe neuropathy", "Vision impairment", "Recurrent infections"],
+      "recommended_tests": ["Frequent daily blood glucose monitoring", "Comprehensive metabolic panel", "Urine albumin test"],
+      "medications": ["Insulin therapy", "Advanced antidiabetic medications (GLP-1, SGLT2 inhibitors) as prescribed."],
+      "diet_suggestions": ["Highly regulated macronutrient intake.", "Consult a registered dietitian for a specialized plan."],
+      "lifestyle_changes": ["Supervised physical activity.", "Rigorous skin and foot care."],
+      "preventive_measures": ["Avoid injuries due to neuropathy.", "Strict adherence to medication schedules."],
+      "follow_up": ["Immediate and ongoing endocrinologist evaluation."],
+      "emergency_warnings": ["Loss of consciousness", "Severe chest pain", "Diabetic ketoacidosis (DKA) symptoms"]
+    }
+  },
+  "HEART_DISEASE": {
+    "0": {
+      "level": "Normal/Low Risk",
+      "symptoms": ["None."],
+      "recommended_tests": ["Annual Lipid Panel", "Routine Blood Pressure Check"],
+      "medications": ["None required."],
+      "diet_suggestions": ["Maintain lean protein intake.", "Consume omega-3 fatty acids.", "Limit saturated fats."],
+      "lifestyle_changes": ["Regular cardiovascular exercise.", "Maintain active lifestyle."],
+      "preventive_measures": ["Avoid smoking.", "Limit alcohol consumption."],
+      "follow_up": ["Routine annual checkup."],
+      "emergency_warnings": ["Unexpected chest discomfort"]
+    },
+    "1": {
+      "level": "Mild Risk / Elevated",
+      "symptoms": ["Occasional shortness of breath during exertion", "Mild fatigue"],
+      "recommended_tests": ["Lipid profile", "ECG during routine visit"],
+      "medications": ["Physician may consider low-dose statins if familial risk is high."],
+      "diet_suggestions": ["Reduce sodium intake.", "Switch to whole grains and plant-based fats."],
+      "lifestyle_changes": ["Stress-reduction therapies (yoga, meditation).", "Light aerobic exercise daily."],
+      "preventive_measures": ["Monitor blood pressure weekly at home."],
+      "follow_up": ["Consult physician every 6-12 months."],
+      "emergency_warnings": ["Palpitations", "Dizziness"]
+    },
+    "2": {
+      "level": "High Risk",
+      "symptoms": ["Chest tightness", "Shortness of breath", "Swelling in legs (edema)"],
+      "recommended_tests": ["Echocardiogram", "Stress test", "Advanced lipid profiling"],
+      "medications": ["Statins, Beta-blockers, or ACE inhibitors as prescribed by a cardiologist."],
+      "diet_suggestions": ["Strict Mediterranean diet.", "Minimize sodium (<1500mg/day).", "Zero trans fats."],
+      "lifestyle_changes": ["Supervised cardiac rehabilitation program.", "Strict weight control."],
+      "preventive_measures": ["Daily monitoring of blood pressure and weight."],
+      "follow_up": ["Consult a cardiologist every 3 months."],
+      "emergency_warnings": ["Radiating chest pain (jaw, left arm)", "Severe breathlessness"]
+    },
+    "3": {
+      "level": "Critical Risk / Severe Heart Disease",
+      "symptoms": ["Angina at rest", "Severe edema", "Extreme fatigue"],
+      "recommended_tests": ["Coronary Angiography", "Cardiac MRI", "Frequent ECGs"],
+      "medications": ["Intensive cardiovascular pharmacology (Anticoagulants, Diuretics, Nitrates) as prescribed."],
+      "diet_suggestions": ["Fluid restriction if heart failure is present.", "Rigid diet adherence under clinical supervision."],
+      "lifestyle_changes": ["Minimize physical strain.", "Complete rest and supervised minimal activity."],
+      "preventive_measures": ["Absolute avoidance of stress and physical exertion."],
+      "follow_up": ["Immediate hospitalization or very frequent cardiologist supervision."],
+      "emergency_warnings": ["Crushing chest pain", "Fainting", "Sudden severe shortness of breath"]
+    }
+  },
+  "LIVER_DISEASE": {
+    "0": {
+      "level": "Normal/Low Risk",
+      "symptoms": ["None."],
+      "recommended_tests": ["Annual Liver Function Test (LFT)"],
+      "medications": ["None required."],
+      "diet_suggestions": ["Balanced diet rich in antioxidants.", "Adequate hydration."],
+      "lifestyle_changes": ["Moderate alcohol consumption or complete avoidance.", "Regular exercise."],
+      "preventive_measures": ["Hepatitis vaccinations.", "Avoid sharing needles or personal hygiene items."],
+      "follow_up": ["Routine annual screening."],
+      "emergency_warnings": ["Yellowing of eyes/skin (Jaundice)"]
+    },
+    "1": {
+      "level": "Mild Risk / Hepatic Distress",
+      "symptoms": ["Fatigue", "Mild abdominal discomfort", "Loss of appetite"],
+      "recommended_tests": ["Comprehensive LFT", "Liver Ultrasound", "Viral Hepatitis screening"],
+      "medications": ["Avoid hepatotoxic medications (e.g., excess acetaminophen)."],
+      "diet_suggestions": ["Reduce fat intake.", "Avoid processed foods and high-fructose corn syrup."],
+      "lifestyle_changes": ["Strongly avoid all alcohol.", "Weight loss if fatty liver is suspected."],
+      "preventive_measures": ["Review all supplements and medications with a doctor."],
+      "follow_up": ["Consult a gastroenterologist/hepatologist every 6 months."],
+      "emergency_warnings": ["Severe abdominal pain", "Dark urine", "Pale stools"]
+    },
+    "2": {
+      "level": "High Risk / Advanced Liver Disease",
+      "symptoms": ["Jaundice", "Significant weight loss", "Itchy skin"],
+      "recommended_tests": ["Liver Biopsy", "CT Scan/MRI of liver", "FibroScan"],
+      "medications": ["Specific treatments for underlying cause (e.g., antivirals, immunosuppressants) as prescribed."],
+      "diet_suggestions": ["Low-sodium diet to prevent fluid retention.", "Moderate to high protein from plant sources/dairy."],
+      "lifestyle_changes": ["Absolute alcohol abstinence.", "Avoid raw seafood (due to bacteria risk)."],
+      "preventive_measures": ["Vaccination against pneumococcus and influenza."],
+      "follow_up": ["Consult a hepatologist every 1-3 months."],
+      "emergency_warnings": ["Vomiting blood", "Confusion (Hepatic Encephalopathy)", "Severe swelling of abdomen"]
+    },
+    "3": {
+      "level": "Critical Risk / Liver Failure",
+      "symptoms": ["Severe jaundice", "Ascites (fluid in abdomen)", "Hepatic encephalopathy"],
+      "recommended_tests": ["Continuous monitoring of LFTs, PT/INR, Kidney function"],
+      "medications": ["Diuretics, Lactulose, Antibiotics as prescribed in clinical setting."],
+      "diet_suggestions": ["Strict dietary management via clinical nutritionist.", "Fluid and sodium restriction."],
+      "lifestyle_changes": ["Complete clinical care.", "Preparation for potential liver transplant evaluation."],
+      "preventive_measures": ["Infection prevention."],
+      "follow_up": ["Immediate hospitalization and critical care."],
+      "emergency_warnings": ["Unresponsiveness", "Massive gastrointestinal bleeding"]
+    }
+  },
+  "KIDNEY_DISEASE": {
+    "0": {
+      "level": "Normal/Low Risk",
+      "symptoms": ["None."],
+      "recommended_tests": ["Routine Urinalysis", "Basic Metabolic Panel (BMP)"],
+      "medications": ["None required."],
+      "diet_suggestions": ["Maintain balanced hydration.", "Avoid excessive salt intake."],
+      "lifestyle_changes": ["Regular exercise.", "Maintain healthy weight."],
+      "preventive_measures": ["Avoid overuse of NSAIDs (e.g., ibuprofen)."],
+      "follow_up": ["Routine annual screening."],
+      "emergency_warnings": ["Blood in urine", "Unexplained swelling in feet"]
+    },
+    "1": {
+      "level": "Mild Risk / Kidney Strain",
+      "symptoms": ["Changes in urination frequency", "Mild fatigue"],
+      "recommended_tests": ["Serum Creatinine", "eGFR calculation", "Urine Albumin-to-Creatinine Ratio (UACR)"],
+      "medications": ["Blood pressure control medications if indicated."],
+      "diet_suggestions": ["Reduce sodium intake.", "Monitor protein intake (do not consume excess)."],
+      "lifestyle_changes": ["Control blood pressure and blood sugar tightly.", "Stay adequately hydrated."],
+      "preventive_measures": ["Consult a doctor before taking any supplements or pain relievers."],
+      "follow_up": ["Consult a nephrologist every 6-12 months."],
+      "emergency_warnings": ["Foamy urine", "Persistent puffiness around eyes"]
+    },
+    "2": {
+      "level": "High Risk / Chronic Kidney Disease",
+      "symptoms": ["Swelling in ankles/legs", "Fatigue", "Muscle cramps at night"],
+      "recommended_tests": ["Renal Ultrasound", "Frequent BMP/CMP"],
+      "medications": ["ACE inhibitors/ARBs, Diuretics, Phosphate binders as prescribed."],
+      "diet_suggestions": ["Renal diet: restrict sodium, potassium, and phosphorus.", "Controlled, high-quality protein intake."],
+      "lifestyle_changes": ["Smoking cessation.", "Strict blood pressure management."],
+      "preventive_measures": ["Avoid contrast dyes for imaging unless necessary."],
+      "follow_up": ["Consult a nephrologist every 3 months."],
+      "emergency_warnings": ["Severe nausea", "Shortness of breath due to fluid buildup"]
+    },
+    "3": {
+      "level": "Critical Risk / End Stage Renal Disease",
+      "symptoms": ["Severe nausea/vomiting", "Loss of appetite", "Decreased mental sharpness"],
+      "recommended_tests": ["Dialysis preparation tests", "Continuous electrolyte monitoring"],
+      "medications": ["Erythropoiesis-stimulating agents (ESAs), Iron supplements, active Vitamin D as prescribed."],
+      "diet_suggestions": ["Strict renal diet under a dietitian.", "Fluid restriction."],
+      "lifestyle_changes": ["Preparation for dialysis or kidney transplant."],
+      "preventive_measures": ["Vascular access care (if dialysis)."],
+      "follow_up": ["Immediate and ongoing nephrology care/dialysis center."],
+      "emergency_warnings": ["Seizures", "Chest pain (pericarditis)", "Complete lack of urination"]
+    }
+  },
+  "THYROID_DISEASE": {
+    "0": {
+      "level": "Normal/Low Risk",
+      "symptoms": ["None."],
+      "recommended_tests": ["TSH test every 5 years or during routine checkups"],
+      "medications": ["None required."],
+      "diet_suggestions": ["Balanced iodine intake (e.g., iodized salt, seafood)."],
+      "lifestyle_changes": ["Maintain healthy sleep patterns."],
+      "preventive_measures": ["Ensure adequate dietary selenium and zinc."],
+      "follow_up": ["Routine screening."],
+      "emergency_warnings": ["Unexplained lump in the neck"]
+    },
+    "1": {
+      "level": "Mild Risk / Subclinical Thyroid Issue",
+      "symptoms": ["Mild fatigue", "Slight weight changes", "Sensitivity to cold or heat"],
+      "recommended_tests": ["Free T3, Free T4, Thyroid Antibodies (TPO, TGAb)"],
+      "medications": ["Monitoring only; medication rarely required at this stage."],
+      "diet_suggestions": ["If hyperthyroid risk: avoid excessive dietary iodine. If hypothyroid: ensure adequate iodine."],
+      "lifestyle_changes": ["Stress management.", "Regular moderate exercise."],
+      "preventive_measures": ["Avoid dietary extremes."],
+      "follow_up": ["Consult an endocrinologist in 3-6 months."],
+      "emergency_warnings": ["Rapid heartbeat", "Significant unexplained weight loss"]
+    },
+    "2": {
+      "level": "High Risk / Clinical Thyroid Disease",
+      "symptoms": ["Significant weight gain/loss", "Hair loss", "Palpitations", "Depression"],
+      "recommended_tests": ["Thyroid Ultrasound", "Frequent TSH and Free T4 monitoring"],
+      "medications": ["Hypothyroidism: Levothyroxine. Hyperthyroidism: Antithyroid drugs (Methimazole) as prescribed."],
+      "diet_suggestions": ["Limit soy and goitrogens (e.g., raw cabbage, broccoli) if taking levothyroxine.", "Take medication on an empty stomach."],
+      "lifestyle_changes": ["Consistent daily routine.", "Adequate sleep and energy conservation if fatigued."],
+      "preventive_measures": ["Adhere strictly to medication timing."],
+      "follow_up": ["Endocrinologist evaluation every 6-8 weeks until stable."],
+      "emergency_warnings": ["Severe tremors", "Bulging eyes", "Thyroid storm symptoms (high fever, delirium)"]
+    },
+    "3": {
+      "level": "Critical Risk / Severe Thyroid Dysfunction",
+      "symptoms": ["Myxedema coma symptoms (extreme cold, lethargy)", "Thyroid storm symptoms"],
+      "recommended_tests": ["Continuous clinical monitoring of thyroid hormones and vitals"],
+      "medications": ["Intravenous thyroid hormones or beta-blockers/antithyroid drugs in ICU."],
+      "diet_suggestions": ["Clinical nutrition only."],
+      "lifestyle_changes": ["Immediate medical intervention."],
+      "preventive_measures": ["Avoid stressors that trigger thyroid storm/myxedema coma."],
+      "follow_up": ["Immediate hospitalization."],
+      "emergency_warnings": ["Loss of consciousness", "Extremely high fever", "Dangerously slow or fast heart rate"]
+    }
+  },
+  "PULMONARY_DISEASE": {
+    "0": {
+      "level": "Normal/Low Risk",
+      "symptoms": ["None."],
+      "recommended_tests": ["Routine Pulmonary Function Tests (if exposed to occupational hazards)"],
+      "medications": ["None required."],
+      "diet_suggestions": ["Antioxidant-rich diet (fruits and vegetables)."],
+      "lifestyle_changes": ["Cardiovascular exercises to maintain lung capacity.", "Avoid secondhand smoke."],
+      "preventive_measures": ["Annual flu vaccine."],
+      "follow_up": ["Routine annual physical."],
+      "emergency_warnings": ["Sudden severe shortness of breath"]
+    },
+    "1": {
+      "level": "Mild Risk / Early Airway Obstruction",
+      "symptoms": ["Chronic cough", "Mild shortness of breath during exertion", "Sputum production"],
+      "recommended_tests": ["Spirometry", "Chest X-ray"],
+      "medications": ["Short-acting bronchodilators (inhalers) as needed/prescribed."],
+      "diet_suggestions": ["Stay hydrated to thin mucus.", "Diet high in vitamins C and E."],
+      "lifestyle_changes": ["Absolute cessation of smoking.", "Practice deep breathing exercises (pursed-lip breathing)."],
+      "preventive_measures": ["Avoid air pollution and respiratory irritants.", "Pneumococcal vaccine."],
+      "follow_up": ["Consult a pulmonologist every 6 months."],
+      "emergency_warnings": ["Wheezing that doesn't improve with inhaler"]
+    },
+    "2": {
+      "level": "High Risk / Chronic Pulmonary Disease (COPD/Asthma)",
+      "symptoms": ["Frequent exacerbations", "Significant shortness of breath", "Fatigue"],
+      "recommended_tests": ["Full Pulmonary Function Testing", "High-Resolution CT scan", "Arterial Blood Gas (ABG)"],
+      "medications": ["Long-acting bronchodilators, inhaled corticosteroids, oral steroids during flare-ups as prescribed."],
+      "diet_suggestions": ["Frequent, small, nutrient-dense meals to prevent fatigue while eating.", "Low-carbohydrate diet to reduce CO2 production."],
+      "lifestyle_changes": ["Pulmonary rehabilitation.", "Energy conservation techniques."],
+      "preventive_measures": ["Use an air purifier.", "Strict avoidance of cold/flu exposure."],
+      "follow_up": ["Consult a pulmonologist every 3 months."],
+      "emergency_warnings": ["Blue lips or fingers (Cyanosis)", "Confusion or severe lethargy"]
+    },
+    "3": {
+      "level": "Critical Risk / Severe Respiratory Failure",
+      "symptoms": ["Oxygen saturation dangerously low", "Inability to catch breath at rest", "Right-sided heart failure (Cor Pulmonale)"],
+      "recommended_tests": ["Continuous ABG monitoring", "Sleep study for nocturnal hypoxemia"],
+      "medications": ["Supplemental oxygen therapy.", "Advanced systemic corticosteroids and antibiotics as prescribed."],
+      "diet_suggestions": ["Enteral nutrition if unable to eat."],
+      "lifestyle_changes": ["Home oxygen therapy.", "Palliative care considerations if appropriate."],
+      "preventive_measures": ["Avoid high altitudes and airplane travel without oxygen arrangements."],
+      "follow_up": ["Immediate hospitalization or intensive home nursing care."],
+      "emergency_warnings": ["Respiratory arrest", "Extreme difficulty breathing leading to panic"]
+    }
+  },
+  "STROKE": {
+    "0": {
+      "level": "Normal/Low Risk",
+      "symptoms": ["None."],
+      "recommended_tests": ["Annual Blood Pressure Check", "Lipid Profile", "Fasting Glucose"],
+      "medications": ["None required."],
+      "diet_suggestions": ["Mediterranean diet.", "Rich in fruits, vegetables, and whole grains."],
+      "lifestyle_changes": ["Regular cardiovascular exercise.", "Maintain healthy weight."],
+      "preventive_measures": ["Avoid smoking.", "Limit alcohol intake."],
+      "follow_up": ["Routine annual physical."],
+      "emergency_warnings": ["Sudden numbness", "Sudden confusion", "Trouble speaking"]
+    },
+    "1": {
+      "level": "Mild Risk / Elevated Factors",
+      "symptoms": ["Occasional dizziness", "High glycemic strain", "Elevated blood pressure"],
+      "recommended_tests": ["ECG for Atrial Fibrillation", "Carotid Ultrasound if indicated"],
+      "medications": ["Antihypertensives or statins if prescribed by physician."],
+      "diet_suggestions": ["Strictly limit sodium intake.", "Reduce refined sugars."],
+      "lifestyle_changes": ["Initiate regular aerobic warm-ups.", "Stress management."],
+      "preventive_measures": ["Monitor blood pressure at home.", "Manage diabetes tightly if present."],
+      "follow_up": ["Consult a primary care physician every 6 months."],
+      "emergency_warnings": ["Transient Ischemic Attack (mini-stroke) symptoms"]
+    },
+    "2": {
+      "level": "High Risk / TIA History",
+      "symptoms": ["Previous mini-strokes", "Severe hypertension", "Carotid artery stenosis"],
+      "recommended_tests": ["MRI of the Brain", "Echocardiogram", "Continuous Holter Monitor"],
+      "medications": ["Antiplatelets (Aspirin/Clopidogrel) or Anticoagulants as prescribed.", "Intensive BP medication."],
+      "diet_suggestions": ["DASH Diet.", "High potassium intake (unless contraindicated by kidney issues)."],
+      "lifestyle_changes": ["Strict adherence to medication.", "Avoid heavy lifting or extreme exertion."],
+      "preventive_measures": ["Immediate reporting of any transient neurological symptoms."],
+      "follow_up": ["Consult a neurologist and cardiologist every 3 months."],
+      "emergency_warnings": ["Facial drooping", "Arm weakness", "Slurred speech (FAST warning signs)"]
+    },
+    "3": {
+      "level": "Critical Risk / Acute Stroke Risk",
+      "symptoms": ["Active neurological deficits", "Extremely high uncontrollable blood pressure"],
+      "recommended_tests": ["Emergency CT/MRI of Head"],
+      "medications": ["Emergency thrombolytics (tPA) if within window.", "Advanced clinical management."],
+      "diet_suggestions": ["NPO (nothing by mouth) until swallowing evaluation in hospital."],
+      "lifestyle_changes": ["Post-stroke intensive rehabilitation (PT/OT/Speech)."],
+      "preventive_measures": ["Secondary stroke prevention protocols."],
+      "follow_up": ["Immediate emergency medical care (Call 911)."],
+      "emergency_warnings": ["Sudden severe headache with no known cause", "Loss of balance/coordination"]
+    }
+  },
+  "ANEMIA": {
+    "0": {
+      "level": "Normal/Low Risk",
+      "symptoms": ["None."],
+      "recommended_tests": ["Complete Blood Count (CBC) annually"],
+      "medications": ["None required."],
+      "diet_suggestions": ["Nutrient-dense diet rich in vitamins.", "Adequate dietary iron and B-vitamins."],
+      "lifestyle_changes": ["Maintain healthy lifestyle."],
+      "preventive_measures": ["Avoid excessive blood donation without adequate recovery."],
+      "follow_up": ["Routine annual screening."],
+      "emergency_warnings": ["Sudden severe fatigue and paleness"]
+    },
+    "1": {
+      "level": "Mild Risk / Marginal Levels",
+      "symptoms": ["Mild fatigue", "Weakness", "Pale skin"],
+      "recommended_tests": ["Iron panel", "Ferritin", "Vitamin B12 and Folate levels"],
+      "medications": ["Over-the-counter multivitamin or mild iron supplements if recommended."],
+      "diet_suggestions": ["Incorporate iron-rich foods (spinach, red meat, lentils).", "Pair iron with Vitamin C for better absorption."],
+      "lifestyle_changes": ["Avoid drinking tea/coffee with meals (inhibits iron absorption)."],
+      "preventive_measures": ["Monitor menstrual flow if applicable."],
+      "follow_up": ["Consult physician in 3-6 months to recheck CBC."],
+      "emergency_warnings": ["Dizziness upon standing", "Shortness of breath with mild exertion"]
+    },
+    "2": {
+      "level": "High Risk / Clinical Anemia",
+      "symptoms": ["Significant fatigue", "Shortness of breath", "Cold hands and feet", "Brittle nails"],
+      "recommended_tests": ["Reticulocyte count", "Peripheral blood smear", "Endoscopy/Colonoscopy to rule out bleeding"],
+      "medications": ["Prescription iron supplements, Vitamin B12 injections, or folic acid as prescribed."],
+      "diet_suggestions": ["Intensive iron/B12 rich diet.", "Avoid calcium supplements at the same time as iron."],
+      "lifestyle_changes": ["Take rest periods.", "Avoid strenuous exercise until levels improve."],
+      "preventive_measures": ["Investigate underlying causes (e.g., gastrointestinal bleeding)."],
+      "follow_up": ["Consult a hematologist every 1-2 months."],
+      "emergency_warnings": ["Chest pain", "Fainting", "Extremely rapid heart rate"]
+    },
+    "3": {
+      "level": "Critical Risk / Severe Anemia",
+      "symptoms": ["Fainting", "Severe shortness of breath at rest", "Chest pain (Angina) due to low oxygen delivery"],
+      "recommended_tests": ["Type and Crossmatch for blood transfusion", "Bone marrow biopsy"],
+      "medications": ["Intravenous (IV) iron.", "Blood transfusions.", "Erythropoiesis-stimulating agents (ESAs) in clinical setting."],
+      "diet_suggestions": ["Medical nutrition therapy."],
+      "lifestyle_changes": ["Bed rest.", "Fall precautions due to extreme dizziness."],
+      "preventive_measures": ["Immediate hospitalization."],
+      "follow_up": ["Emergency hematology and critical care."],
+      "emergency_warnings": ["Loss of consciousness", "Heart attack symptoms", "Massive bleeding"]
+    }
+  }
+}
