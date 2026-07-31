@@ -110,9 +110,11 @@ export default function DietPlannerPage() {
   });
 
   const fetchBackendPlan = async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!token) return;
     try {
       const res = await api.get("/lifestyle/plan");
-      if (res.data) {
+      if (res && res.data) {
         if (res.data.dietPlanJson) {
           const parsed = JSON.parse(res.data.dietPlanJson);
           if (Array.isArray(parsed) && parsed.length > 0) {
@@ -125,8 +127,8 @@ export default function DietPlannerPage() {
           localStorage.setItem("medipredict_water_glasses", res.data.waterGlasses.toString());
         }
       }
-    } catch (err) {
-      console.warn("Backend diet plan fetch fallback to local storage", err);
+    } catch {
+      // Quiet local storage fallback
     }
   };
 

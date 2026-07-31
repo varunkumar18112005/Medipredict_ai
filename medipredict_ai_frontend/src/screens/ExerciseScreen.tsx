@@ -122,9 +122,11 @@ export default function ExerciseScreen({ navigation }: any) {
   });
 
   const fetchBackendExercisePlan = async () => {
+    const token = await AsyncStorage.getItem("accessToken");
+    if (!token) return;
     try {
       const res = await api.get("/lifestyle/plan");
-      if (res.data) {
+      if (res && res.data) {
         if (res.data.exercisePlanJson) {
           const parsed = JSON.parse(res.data.exercisePlanJson);
           if (Array.isArray(parsed) && parsed.length > 0) {
@@ -137,8 +139,8 @@ export default function ExerciseScreen({ navigation }: any) {
           await AsyncStorage.setItem("medipredict_active_minutes", res.data.workoutMinutes.toString());
         }
       }
-    } catch (err) {
-      console.warn("Mobile backend exercise plan fetch fallback to AsyncStorage", err);
+    } catch {
+      // Quiet local storage fallback
     }
   };
 

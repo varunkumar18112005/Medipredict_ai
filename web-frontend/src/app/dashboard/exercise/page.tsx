@@ -105,9 +105,11 @@ export default function ExercisePlannerPage() {
   });
 
   const fetchBackendExercisePlan = async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!token) return;
     try {
       const res = await api.get("/lifestyle/plan");
-      if (res.data) {
+      if (res && res.data) {
         if (res.data.exercisePlanJson) {
           const parsed = JSON.parse(res.data.exercisePlanJson);
           if (Array.isArray(parsed) && parsed.length > 0) {
@@ -120,8 +122,8 @@ export default function ExercisePlannerPage() {
           localStorage.setItem("medipredict_active_minutes", res.data.workoutMinutes.toString());
         }
       }
-    } catch (err) {
-      console.warn("Backend exercise plan fetch fallback to local storage", err);
+    } catch {
+      // Quiet local storage fallback
     }
   };
 

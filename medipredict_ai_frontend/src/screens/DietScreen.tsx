@@ -128,9 +128,11 @@ export default function DietScreen({ navigation }: any) {
   });
 
   const fetchBackendPlan = async () => {
+    const token = await AsyncStorage.getItem("accessToken");
+    if (!token) return;
     try {
       const res = await api.get("/lifestyle/plan");
-      if (res.data) {
+      if (res && res.data) {
         if (res.data.dietPlanJson) {
           const parsed = JSON.parse(res.data.dietPlanJson);
           if (Array.isArray(parsed) && parsed.length > 0) {
@@ -143,8 +145,8 @@ export default function DietScreen({ navigation }: any) {
           await AsyncStorage.setItem("medipredict_water_glasses", res.data.waterGlasses.toString());
         }
       }
-    } catch (err) {
-      console.warn("Mobile backend diet plan fetch fallback to AsyncStorage", err);
+    } catch {
+      // Quiet local storage fallback
     }
   };
 
