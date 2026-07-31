@@ -162,7 +162,7 @@ export default function ExercisePlannerPage() {
 
     // 2. Fetch Remote Plan from Backend & set up real-time sync poll
     fetchBackendExercisePlan();
-    const interval = setInterval(fetchBackendExercisePlan, 4000);
+    const interval = setInterval(fetchBackendExercisePlan, 2000);
     window.addEventListener("focus", fetchBackendExercisePlan);
 
     return () => {

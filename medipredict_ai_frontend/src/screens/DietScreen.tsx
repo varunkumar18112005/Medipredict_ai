@@ -157,7 +157,7 @@ export default function DietScreen({ navigation }: any) {
       fetchBackendPlan();
     });
 
-    const interval = setInterval(fetchBackendPlan, 4000);
+    const interval = setInterval(fetchBackendPlan, 2000);
 
     return () => {
       if (unsubscribe) unsubscribe();

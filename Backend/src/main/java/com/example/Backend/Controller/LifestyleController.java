@@ -4,6 +4,7 @@ import com.example.Backend.Dto.LifestyleDto;
 import com.example.Backend.Repository.UserRepository;
 import com.example.Backend.Service.LifestyleService;
 import com.example.Backend.model.User;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,23 @@ public class LifestyleController {
 
     private final LifestyleService lifestyleService;
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Optional<User> getUser(UserDetails userDetails) {
         if (userDetails == null || userDetails.getUsername() == null) {
             return Optional.empty();
         }
         return userRepository.findByEmail(userDetails.getUsername());
+    }
+
+    private String extractJson(Object obj) {
+        if (obj == null) return null;
+        if (obj instanceof String str) return str;
+        try {
+            return objectMapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            return obj.toString();
+        }
     }
 
     @GetMapping("/plan")
@@ -63,14 +75,14 @@ public class LifestyleController {
             if (userOpt.isEmpty()) {
                 return ResponseEntity.status(401).build();
             }
-            String dietPlanJson = body.containsKey("dietPlanJson") ? (String) body.get("dietPlanJson") : null;
+            String dietPlanJson = extractJson(body.get("dietPlanJson"));
             Integer waterGlasses = body.containsKey("waterGlasses") && body.get("waterGlasses") != null
                     ? Integer.parseInt(body.get("waterGlasses").toString())
                     : null;
 
             return ResponseEntity.ok(lifestyleService.updateDietPlan(userOpt.get(), dietPlanJson, waterGlasses));
         } catch (Exception e) {
-            log.error("Error updating diet plan: {}", e.getMessage());
+            log.error("Error updating diet plan: {}", e.getMessage(), e);
             return ResponseEntity.ok(LifestyleDto.builder().build());
         }
     }
@@ -84,16 +96,17 @@ public class LifestyleController {
             if (userOpt.isEmpty()) {
                 return ResponseEntity.status(401).build();
             }
-            String exercisePlanJson = body.containsKey("exercisePlanJson") ? (String) body.get("exercisePlanJson") : null;
+            String exercisePlanJson = extractJson(body.get("exercisePlanJson"));
             Integer workoutMinutes = body.containsKey("workoutMinutes") && body.get("workoutMinutes") != null
                     ? Integer.parseInt(body.get("workoutMinutes").toString())
                     : null;
 
             return ResponseEntity.ok(lifestyleService.updateExercisePlan(userOpt.get(), exercisePlanJson, workoutMinutes));
         } catch (Exception e) {
-            log.error("Error updating exercise plan: {}", e.getMessage());
+            log.error("Error updating exercise plan: {}", e.getMessage(), e);
             return ResponseEntity.ok(LifestyleDto.builder().build());
         }
     }
 }
+
 

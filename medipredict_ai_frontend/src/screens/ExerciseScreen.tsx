@@ -151,7 +151,7 @@ export default function ExerciseScreen({ navigation }: any) {
       fetchBackendExercisePlan();
     });
 
-    const interval = setInterval(fetchBackendExercisePlan, 4000);
+    const interval = setInterval(fetchBackendExercisePlan, 2000);
 
     return () => {
       if (unsubscribe) unsubscribe();

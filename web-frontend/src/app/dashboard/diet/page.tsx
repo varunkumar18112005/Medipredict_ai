@@ -167,7 +167,7 @@ export default function DietPlannerPage() {
 
     // 2. Fetch Remote Plan from Backend & set up real-time sync poll
     fetchBackendPlan();
-    const interval = setInterval(fetchBackendPlan, 4000);
+    const interval = setInterval(fetchBackendPlan, 2000);
     window.addEventListener("focus", fetchBackendPlan);
 
     return () => {
