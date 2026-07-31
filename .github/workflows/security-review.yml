@@ -49,23 +49,8 @@ jobs:
           config: p/default
         continue-on-error: true
 
-      - name: Cache Maven Local Repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Resolve Maven Dependencies (Cache for Security Scan)
-        run: |
-          if [ -d "Backend" ]; then
-            cd Backend && ./mvnw dependency:go-offline -DskipTests || true
-          fi
-        continue-on-error: true
-
       - name: Run Trivy Filesystem Scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -73,7 +58,6 @@ jobs:
           output: 'trivy-report.txt'
           severity: 'CRITICAL,HIGH,MEDIUM'
           exit-code: '0'
-          ignore-unfixed: true
         continue-on-error: true
 
       - name: Audit Node.js Dependencies (web-frontend)
