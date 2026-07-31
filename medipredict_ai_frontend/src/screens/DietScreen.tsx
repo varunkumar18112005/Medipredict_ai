@@ -17,6 +17,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import { useDrawer } from "../context/DrawerContext";
 
+import api from "../services/api";
+
 const { width } = Dimensions.get("window");
 
 interface MealItem {
@@ -125,9 +127,41 @@ export default function DietScreen({ navigation }: any) {
     year: "numeric",
   });
 
+  const fetchBackendPlan = async () => {
+    try {
+      const res = await api.get("/lifestyle/plan");
+      if (res.data) {
+        if (res.data.dietPlanJson) {
+          const parsed = JSON.parse(res.data.dietPlanJson);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setWeeklyPlan(parsed);
+            await AsyncStorage.setItem("medipredict_weekly_diet_plan", JSON.stringify(parsed));
+          }
+        }
+        if (res.data.waterGlasses !== undefined && res.data.waterGlasses !== null) {
+          setWaterGlasses(res.data.waterGlasses);
+          await AsyncStorage.setItem("medipredict_water_glasses", res.data.waterGlasses.toString());
+        }
+      }
+    } catch (err) {
+      console.warn("Mobile backend diet plan fetch fallback to AsyncStorage", err);
+    }
+  };
+
   useEffect(() => {
     loadDietData();
-  }, []);
+
+    const unsubscribe = navigation?.addListener?.("focus", () => {
+      fetchBackendPlan();
+    });
+
+    const interval = setInterval(fetchBackendPlan, 4000);
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+      clearInterval(interval);
+    };
+  }, [navigation, todayStr]);
 
   const loadDietData = async () => {
     try {
@@ -161,12 +195,15 @@ export default function DietScreen({ navigation }: any) {
       if (savedWater) {
         setWaterGlasses(parseInt(savedWater, 10) || 3);
       }
+
+      // Fetch latest cloud state
+      await fetchBackendPlan();
     } catch (err) {
       console.warn("Failed to load diet data", err);
     }
   };
 
-  const saveWeeklyPlan = async (newPlan: DayPlan[]) => {
+  const saveWeeklyPlan = async (newPlan: DayPlan[], waterVal = waterGlasses) => {
     setWeeklyPlan(newPlan);
     try {
       await AsyncStorage.setItem("medipredict_weekly_diet_plan", JSON.stringify(newPlan));
@@ -176,9 +213,22 @@ export default function DietScreen({ navigation }: any) {
         await AsyncStorage.setItem("medipredict_diet_items", JSON.stringify(currentDayPlan.meals));
       }
       await AsyncStorage.setItem("medipredict_diet_last_date", todayStr);
+
+      // Post to Spring Boot backend
+      await api.post("/lifestyle/diet", {
+        dietPlanJson: JSON.stringify(newPlan),
+        waterGlasses: waterVal,
+      });
     } catch (err) {
       console.warn("Failed to save weekly diet plan", err);
     }
+  };
+
+  const updateWater = async (delta: number) => {
+    const newVal = Math.max(0, Math.min(16, waterGlasses + delta));
+    setWaterGlasses(newVal);
+    await AsyncStorage.setItem("medipredict_water_glasses", newVal.toString());
+    await saveWeeklyPlan(weeklyPlan, newVal);
   };
 
   const toggleMealCompleted = (dayName: string, mealId: string) => {
@@ -241,12 +291,6 @@ export default function DietScreen({ navigation }: any) {
         },
       },
     ]);
-  };
-
-  const updateWater = async (delta: number) => {
-    const newVal = Math.max(0, Math.min(16, waterGlasses + delta));
-    setWaterGlasses(newVal);
-    await AsyncStorage.setItem("medipredict_water_glasses", newVal.toString());
   };
 
   const resetWeeklyPlan = () => {

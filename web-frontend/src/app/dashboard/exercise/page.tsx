@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BorderGlow from "@/components/BorderGlow";
+import api from "@/services/api";
 
 interface ExerciseTask {
   id: string;
@@ -103,6 +104,27 @@ export default function ExercisePlannerPage() {
     year: "numeric",
   });
 
+  const fetchBackendExercisePlan = async () => {
+    try {
+      const res = await api.get("/lifestyle/plan");
+      if (res.data) {
+        if (res.data.exercisePlanJson) {
+          const parsed = JSON.parse(res.data.exercisePlanJson);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setWeeklyPlan(parsed);
+            localStorage.setItem("medipredict_weekly_exercise_plan", JSON.stringify(parsed));
+          }
+        }
+        if (res.data.workoutMinutes !== undefined && res.data.workoutMinutes !== null) {
+          setActiveMinutes(res.data.workoutMinutes);
+          localStorage.setItem("medipredict_active_minutes", res.data.workoutMinutes.toString());
+        }
+      }
+    } catch (err) {
+      console.warn("Backend exercise plan fetch fallback to local storage", err);
+    }
+  };
+
   useEffect(() => {
     // 1. Load Weekly Exercise Plan
     const savedWeeklyStr = localStorage.getItem("medipredict_weekly_exercise_plan");
@@ -120,7 +142,6 @@ export default function ExercisePlannerPage() {
       }
     }
 
-    // Check if daily refresh needed
     const savedDate = localStorage.getItem("medipredict_exercise_last_date");
     if (savedDate !== todayStr) {
       loadedPlan = loadedPlan.map(dp => ({
@@ -132,23 +153,37 @@ export default function ExercisePlannerPage() {
 
     setWeeklyPlan(loadedPlan);
 
-    // 2. Load Active Minutes
     const savedMins = localStorage.getItem("medipredict_active_minutes");
     if (savedMins) {
       setActiveMinutes(parseInt(savedMins, 10) || 30);
     }
+
+    // 2. Fetch Remote Plan from Backend & set up real-time sync poll
+    fetchBackendExercisePlan();
+    const interval = setInterval(fetchBackendExercisePlan, 4000);
+    window.addEventListener("focus", fetchBackendExercisePlan);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", fetchBackendExercisePlan);
+    };
   }, [todayStr]);
 
-  const saveWeeklyPlan = (newPlan: DayExercisePlan[]) => {
+  const saveWeeklyPlan = (newPlan: DayExercisePlan[], minsVal = activeMinutes) => {
     setWeeklyPlan(newPlan);
     localStorage.setItem("medipredict_weekly_exercise_plan", JSON.stringify(newPlan));
 
-    // Also sync today's active tasks to medipredict_exercise_tasks for dashboard care tasks
     const currentDayPlan = newPlan.find(dp => dp.day === selectedDay) || newPlan[0];
     if (currentDayPlan) {
       localStorage.setItem("medipredict_exercise_tasks", JSON.stringify(currentDayPlan.tasks));
     }
     localStorage.setItem("medipredict_exercise_last_date", todayStr);
+
+    // Cloud Sync to Spring Boot Backend
+    api.post("/lifestyle/exercise", {
+      exercisePlanJson: JSON.stringify(newPlan),
+      workoutMinutes: minsVal
+    }).catch(err => console.warn("Failed to sync exercise plan to backend", err));
   };
 
   const toggleTaskCompleted = (dayName: string, taskId: string) => {

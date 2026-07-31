@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import BorderGlow from "@/components/BorderGlow";
+import api from "@/services/api";
 
 interface MealItem {
   id: string;
@@ -89,7 +89,6 @@ const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "S
 export default function DietPlannerPage() {
   const router = useRouter();
   
-  // Determine current day of week name (e.g. "Monday")
   const currentDayName = DAYS_OF_WEEK[(new Date().getDay() + 6) % 7];
   
   const [selectedDay, setSelectedDay] = useState<string>(currentDayName);
@@ -110,8 +109,29 @@ export default function DietPlannerPage() {
     year: "numeric",
   });
 
+  const fetchBackendPlan = async () => {
+    try {
+      const res = await api.get("/lifestyle/plan");
+      if (res.data) {
+        if (res.data.dietPlanJson) {
+          const parsed = JSON.parse(res.data.dietPlanJson);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setWeeklyPlan(parsed);
+            localStorage.setItem("medipredict_weekly_diet_plan", JSON.stringify(parsed));
+          }
+        }
+        if (res.data.waterGlasses !== undefined && res.data.waterGlasses !== null) {
+          setWaterGlasses(res.data.waterGlasses);
+          localStorage.setItem("medipredict_water_glasses", res.data.waterGlasses.toString());
+        }
+      }
+    } catch (err) {
+      console.warn("Backend diet plan fetch fallback to local storage", err);
+    }
+  };
+
   useEffect(() => {
-    // 1. Load Weekly Plan
+    // 1. Load Local Plan first
     const savedWeeklyStr = localStorage.getItem("medipredict_weekly_diet_plan");
     let loadedPlan: DayPlan[] = DEFAULT_WEEKLY_PLAN;
     
@@ -127,10 +147,8 @@ export default function DietPlannerPage() {
       }
     }
     
-    // Check if daily refresh needed
     const savedDate = localStorage.getItem("medipredict_diet_last_date");
     if (savedDate !== todayStr) {
-      // Reset completed status for all days on a new date
       loadedPlan = loadedPlan.map(dp => ({
         ...dp,
         meals: dp.meals.map(m => ({ ...m, completed: false }))
@@ -140,24 +158,38 @@ export default function DietPlannerPage() {
     
     setWeeklyPlan(loadedPlan);
 
-    // 2. Load Water Intake
     const savedWater = localStorage.getItem("medipredict_water_glasses");
     if (savedWater) {
       setWaterGlasses(parseInt(savedWater, 10) || 4);
     }
+
+    // 2. Fetch Remote Plan from Backend & set up real-time sync poll
+    fetchBackendPlan();
+    const interval = setInterval(fetchBackendPlan, 4000);
+    window.addEventListener("focus", fetchBackendPlan);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", fetchBackendPlan);
+    };
   }, [todayStr]);
 
-  // Sync state to LocalStorage
-  const saveWeeklyPlan = (newPlan: DayPlan[]) => {
+  // Sync state to Backend & LocalStorage
+  const saveWeeklyPlan = (newPlan: DayPlan[], waterVal = waterGlasses) => {
     setWeeklyPlan(newPlan);
     localStorage.setItem("medipredict_weekly_diet_plan", JSON.stringify(newPlan));
     
-    // Also sync today's active meals to medipredict_diet_items for dashboard care tasks
     const currentDayPlan = newPlan.find(dp => dp.day === selectedDay) || newPlan[0];
     if (currentDayPlan) {
       localStorage.setItem("medipredict_diet_items", JSON.stringify(currentDayPlan.meals));
     }
     localStorage.setItem("medipredict_diet_last_date", todayStr);
+
+    // Cloud Sync to Spring Boot Backend
+    api.post("/lifestyle/diet", {
+      dietPlanJson: JSON.stringify(newPlan),
+      waterGlasses: waterVal
+    }).catch(err => console.warn("Failed to sync diet plan to backend", err));
   };
 
   const toggleMealCompleted = (dayName: string, mealId: string) => {
@@ -215,6 +247,7 @@ export default function DietPlannerPage() {
     const newVal = Math.max(0, Math.min(16, waterGlasses + delta));
     setWaterGlasses(newVal);
     localStorage.setItem("medipredict_water_glasses", newVal.toString());
+    saveWeeklyPlan(weeklyPlan, newVal);
   };
 
   const resetWeeklyPlan = () => {

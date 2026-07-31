@@ -17,6 +17,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import { useDrawer } from "../context/DrawerContext";
 
+import api from "../services/api";
+
 const { width } = Dimensions.get("window");
 
 interface ExerciseTask {
@@ -119,9 +121,41 @@ export default function ExerciseScreen({ navigation }: any) {
     year: "numeric",
   });
 
+  const fetchBackendExercisePlan = async () => {
+    try {
+      const res = await api.get("/lifestyle/plan");
+      if (res.data) {
+        if (res.data.exercisePlanJson) {
+          const parsed = JSON.parse(res.data.exercisePlanJson);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setWeeklyPlan(parsed);
+            await AsyncStorage.setItem("medipredict_weekly_exercise_plan", JSON.stringify(parsed));
+          }
+        }
+        if (res.data.workoutMinutes !== undefined && res.data.workoutMinutes !== null) {
+          setActiveMinutes(res.data.workoutMinutes);
+          await AsyncStorage.setItem("medipredict_active_minutes", res.data.workoutMinutes.toString());
+        }
+      }
+    } catch (err) {
+      console.warn("Mobile backend exercise plan fetch fallback to AsyncStorage", err);
+    }
+  };
+
   useEffect(() => {
     loadExerciseData();
-  }, []);
+
+    const unsubscribe = navigation?.addListener?.("focus", () => {
+      fetchBackendExercisePlan();
+    });
+
+    const interval = setInterval(fetchBackendExercisePlan, 4000);
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+      clearInterval(interval);
+    };
+  }, [navigation, todayStr]);
 
   const loadExerciseData = async () => {
     try {
@@ -155,12 +189,15 @@ export default function ExerciseScreen({ navigation }: any) {
       if (savedMins) {
         setActiveMinutes(parseInt(savedMins, 10) || 30);
       }
+
+      // Fetch latest cloud state
+      await fetchBackendExercisePlan();
     } catch (err) {
       console.warn("Failed to load exercise data", err);
     }
   };
 
-  const saveWeeklyPlan = async (newPlan: DayExercisePlan[]) => {
+  const saveWeeklyPlan = async (newPlan: DayExercisePlan[], minsVal = activeMinutes) => {
     setWeeklyPlan(newPlan);
     try {
       await AsyncStorage.setItem("medipredict_weekly_exercise_plan", JSON.stringify(newPlan));
@@ -170,6 +207,12 @@ export default function ExerciseScreen({ navigation }: any) {
         await AsyncStorage.setItem("medipredict_exercise_tasks", JSON.stringify(currentDayPlan.tasks));
       }
       await AsyncStorage.setItem("medipredict_exercise_last_date", todayStr);
+
+      // Post to Spring Boot backend
+      await api.post("/lifestyle/exercise", {
+        exercisePlanJson: JSON.stringify(newPlan),
+        workoutMinutes: minsVal,
+      });
     } catch (err) {
       console.warn("Failed to save weekly exercise plan", err);
     }
@@ -240,6 +283,7 @@ export default function ExerciseScreen({ navigation }: any) {
     const newVal = Math.max(0, Math.min(180, activeMinutes + delta));
     setActiveMinutes(newVal);
     await AsyncStorage.setItem("medipredict_active_minutes", newVal.toString());
+    await saveWeeklyPlan(weeklyPlan, newVal);
   };
 
   const resetWeeklyPlan = () => {
