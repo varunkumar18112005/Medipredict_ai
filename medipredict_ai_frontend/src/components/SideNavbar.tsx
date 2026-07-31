@@ -120,7 +120,7 @@ export default function SideNavbar({ navigation, currentRouteName }: SideNavbarP
                     currentRouteName === item.route ||
                     (item.route === 'Home' && (!currentRouteName || currentRouteName === 'MainTabs')) ||
                     (item.route === 'DiseaseSelection' &&
-                      (currentRouteName === 'HealthAnalysis' || currentRouteName === 'Result'));
+                      (currentRouteName === 'HealthAnalysis' || currentRouteName === 'Result' || currentRouteName === 'Analyzing' || currentRouteName === 'RequiredTests' || currentRouteName === 'Suggestions'));
 
                   return (
                     <TouchableOpacity
@@ -129,10 +129,16 @@ export default function SideNavbar({ navigation, currentRouteName }: SideNavbarP
                       onPress={() => handleNavigate(item.route)}
                       activeOpacity={0.8}
                     >
+                      {isActive && <View style={styles.activeBarIndicator} />}
                       <Text style={styles.navIcon}>{item.icon}</Text>
                       <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>
                         {item.label}
                       </Text>
+                      {isActive && (
+                        <View style={styles.activeDotBadge}>
+                          <Text style={styles.activeDotBadgeText}>●</Text>
+                        </View>
+                      )}
                     </TouchableOpacity>
                   );
                 })}
@@ -291,6 +297,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 10,
     elevation: 4,
+    position: 'relative',
+  },
+  activeBarIndicator: {
+    position: 'absolute',
+    left: 0,
+    top: 8,
+    bottom: 8,
+    width: 4,
+    backgroundColor: '#FFFFFF',
+    borderTopRightRadius: 4,
+    borderBottomRightRadius: 4,
+  },
+  activeDotBadge: {
+    marginLeft: 'auto',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  activeDotBadgeText: {
+    color: '#10B981',
+    fontSize: 10,
   },
   navIcon: {
     fontSize: 20,

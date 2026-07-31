@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import BorderGlow from "@/components/BorderGlow";
 import api, { getUser } from "../../services/api";
 
@@ -84,6 +84,8 @@ export default function DashboardPage() {
   };
 
   const fetchData = useCallback(async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!token) return;
     try {
       // Fetch stats
       const statsResponse = await api.get("/assessments/stats");
@@ -91,7 +93,7 @@ export default function DashboardPage() {
 
       // Fetch history
       const historyResponse = await api.get("/assessments?size=20");
-      const content = historyResponse.data.content || [];
+      const content = historyResponse.data?.content || [];
       const sortedContent = [...content].sort((a, b) => parseUtcDate(b.createdAt).getTime() - parseUtcDate(a.createdAt).getTime());
       setHistory(sortedContent);
 
@@ -99,9 +101,35 @@ export default function DashboardPage() {
       try {
         const trendsResponse = await api.get("/assessments/trends");
         setTrendsData(trendsResponse.data || {});
-      } catch (trendErr) {
-        console.error("Failed to fetch trends data:", trendErr);
+      } catch {
+        // Quiet trends fallback
       }
+
+      // 0. Cloud Sync from Spring Boot Backend - Only update if changed
+      let hasDataChanged = false;
+      try {
+        const cloudRes = await api.get("/lifestyle/plan");
+        if (cloudRes && cloudRes.data) {
+          const oldDiet = localStorage.getItem("medipredict_weekly_diet_plan");
+          const oldEx = localStorage.getItem("medipredict_weekly_exercise_plan");
+          if (cloudRes.data.dietPlanJson && cloudRes.data.dietPlanJson !== oldDiet) {
+            localStorage.setItem("medipredict_weekly_diet_plan", cloudRes.data.dietPlanJson);
+            hasDataChanged = true;
+          }
+          if (cloudRes.data.exercisePlanJson && cloudRes.data.exercisePlanJson !== oldEx) {
+            localStorage.setItem("medipredict_weekly_exercise_plan", cloudRes.data.exercisePlanJson);
+            hasDataChanged = true;
+          }
+        }
+      } catch {
+        // Quiet fallback
+      }
+
+      // If background poll triggered and no data changed, skip rebuilding state to prevent UI re-renders!
+      if (!hasDataChanged && careTasks.length > 0 && localStorage.getItem("medipredict_dashboard_initialized")) {
+        return;
+      }
+      localStorage.setItem("medipredict_dashboard_initialized", "true");
 
       // Determine Care Routine Tasks from Weekly Diet and Exercise Planners
       const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -211,6 +239,8 @@ export default function DashboardPage() {
     }
   }, []);
 
+  const lastMutationRef = useRef<number>(0);
+
   useEffect(() => {
     const activeUser = getUser();
     if (!activeUser) {
@@ -220,10 +250,20 @@ export default function DashboardPage() {
     setUser(activeUser);
     fetchData();
 
+    // Poll cloud backend every 3 seconds for real-time dashboard sync
+    const timer = setInterval(() => {
+      if (Date.now() - lastMutationRef.current > 3000) {
+        fetchData();
+      }
+    }, 3000);
+
     // Auto-refresh when user switches back to Dashboard tab
     const handleFocus = () => fetchData();
     window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [router, fetchData]);
 
   // Toggle care task check status and sync with Diet & Exercise planners
@@ -231,6 +271,7 @@ export default function DashboardPage() {
     const target = careTasks.find(t => t.id === id);
     if (!target) return;
 
+    lastMutationRef.current = Date.now();
     const newChecked = !target.checked;
     setCareTasks(prev => prev.map(t => t.id === id ? { ...t, checked: newChecked } : t));
 
@@ -238,61 +279,77 @@ export default function DashboardPage() {
     const currentDayName = DAYS_OF_WEEK[(new Date().getDay() + 6) % 7];
 
     if (target.type === "diet") {
-      // 1. Update medipredict_diet_items
-      const saved = localStorage.getItem("medipredict_diet_items");
-      if (saved) {
-        try {
-          const list = JSON.parse(saved);
-          const updated = list.map((item: any) => item.id === target.originalId ? { ...item, completed: newChecked } : item);
-          localStorage.setItem("medipredict_diet_items", JSON.stringify(updated));
-        } catch (e) {}
-      }
-
-      // 2. Update medipredict_weekly_diet_plan for today
+      let weekly: any[] = [];
       const savedWeekly = localStorage.getItem("medipredict_weekly_diet_plan");
       if (savedWeekly) {
-        try {
-          const weekly = JSON.parse(savedWeekly);
-          const updatedWeekly = weekly.map((dp: any) => {
-            if (dp.day === currentDayName) {
-              return {
-                ...dp,
-                meals: dp.meals.map((m: any) => m.id === target.originalId ? { ...m, completed: newChecked } : m)
-              };
-            }
-            return dp;
-          });
-          localStorage.setItem("medipredict_weekly_diet_plan", JSON.stringify(updatedWeekly));
-        } catch (e) {}
-      }
-    } else if (target.type === "exercise") {
-      // 1. Update medipredict_exercise_tasks
-      const saved = localStorage.getItem("medipredict_exercise_tasks");
-      if (saved) {
-        try {
-          const list = JSON.parse(saved);
-          const updated = list.map((item: any) => item.id === target.originalId ? { ...item, completed: newChecked } : item);
-          localStorage.setItem("medipredict_exercise_tasks", JSON.stringify(updated));
-        } catch (e) {}
+        try { weekly = JSON.parse(savedWeekly); } catch (e) {}
       }
 
-      // 2. Update medipredict_weekly_exercise_plan for today
+      if (!Array.isArray(weekly) || weekly.length === 0) {
+        // Fallback baseline weekly plan if not created yet
+        weekly = [
+          { day: "Monday", meals: [{ id: "mon_b", timeOfDay: "08:00 AM", mealName: "Morning Detox & Breakfast", description: "Oatmeal with chia seeds, almonds & fresh berries + Green Tea", calories: "350 kcal", completed: false }, { id: "mon_l", timeOfDay: "01:30 PM", mealName: "Nutrient-Dense Lunch", description: "Steamed Quinoa or Brown Rice with Lentil Soup & Salad", calories: "480 kcal", completed: false }, { id: "mon_s", timeOfDay: "04:30 PM", mealName: "Evening Hydration & Snack", description: "1 Green Apple with roasted walnuts & pumpkin seeds", calories: "150 kcal", completed: false }, { id: "mon_d", timeOfDay: "07:30 PM", mealName: "Light Healthy Dinner", description: "Grilled Tofu / Chicken breast with steamed broccoli & squash", calories: "380 kcal", completed: false }] },
+          { day: "Tuesday", meals: [{ id: "tue_b", timeOfDay: "08:00 AM", mealName: "Protein-Rich Breakfast", description: "Scrambled egg whites with spinach & whole-grain toast", calories: "320 kcal", completed: false }, { id: "tue_l", timeOfDay: "01:30 PM", mealName: "Balanced Med Bowl", description: "Tuna salad or Chickpea bowl over mixed greens & olive oil", calories: "460 kcal", completed: false }, { id: "tue_s", timeOfDay: "04:30 PM", mealName: "Mid-Afternoon Snack", description: "Greek yogurt with flaxseeds or unsweetened almond butter", calories: "140 kcal", completed: false }, { id: "tue_d", timeOfDay: "07:30 PM", mealName: "Omega-3 Dinner", description: "Baked salmon or cod with roasted asparagus & zucchini", calories: "400 kcal", completed: false }] },
+          { day: "Wednesday", meals: [{ id: "wed_b", timeOfDay: "08:00 AM", mealName: "Fiber Power Breakfast", description: "Chia seed pudding with blueberries & unsweetened almond milk", calories: "290 kcal", completed: false }, { id: "wed_l", timeOfDay: "01:30 PM", mealName: "Legume Power Lunch", description: "Well-cooked lentil stew with brown rice & cucumber salad", calories: "450 kcal", completed: false }, { id: "wed_s", timeOfDay: "04:30 PM", mealName: "Snack & Hydration", description: "Fresh coconut water with 6 raw walnuts", calories: "130 kcal", completed: false }, { id: "wed_d", timeOfDay: "07:30 PM", mealName: "Lean Protein Dinner", description: "Turkey or Tofu stir-fry with bell peppers & green beans", calories: "370 kcal", completed: false }] },
+          { day: "Thursday", meals: [{ id: "thu_b", timeOfDay: "08:00 AM", mealName: "Antioxidant Smoothie", description: "Spinach, avocado, protein powder & coconut water blend", calories: "310 kcal", completed: false }, { id: "thu_l", timeOfDay: "01:30 PM", mealName: "High-Fiber Lunch", description: "Quinoa salad with roasted carrots, pumpkin seeds & lemon", calories: "440 kcal", completed: false }, { id: "thu_s", timeOfDay: "04:30 PM", mealName: "Vitality Snack", description: "Cucumber slices with hummus or roasted edamame", calories: "120 kcal", completed: false }, { id: "thu_d", timeOfDay: "07:30 PM", mealName: "Heart-Healthy Dinner", description: "Baked tilapia or lentil patties with roasted cauliflower", calories: "360 kcal", completed: false }] },
+          { day: "Friday", meals: [{ id: "fri_b", timeOfDay: "08:00 AM", mealName: "Oat & Seed Bowl", description: "Steel-cut oats with ground flaxseed, cinnamon & sliced banana", calories: "340 kcal", completed: false }, { id: "fri_l", timeOfDay: "01:30 PM", mealName: "Protein Salad", description: "Grilled chicken breast or tofu lettuce wraps with avocado", calories: "450 kcal", completed: false }, { id: "fri_s", timeOfDay: "04:30 PM", mealName: "Afternoon Refreshment", description: "Mixed berries with sunflower seeds", calories: "130 kcal", completed: false }, { id: "fri_d", timeOfDay: "07:30 PM", mealName: "Restorative Dinner", description: "Pan-seared cod or mushroom risotto with steamed spinach", calories: "390 kcal", completed: false }] },
+          { day: "Saturday", meals: [{ id: "sat_b", timeOfDay: "08:00 AM", mealName: "Weekend Omelet", description: "Omelet with tomatoes, spinach, mushrooms & avocado", calories: "360 kcal", completed: false }, { id: "sat_l", timeOfDay: "01:30 PM", mealName: "Mediterranean Wrap", description: "Whole-grain hummus & roasted veggie wrap with tabbouleh", calories: "470 kcal", completed: false }, { id: "sat_s", timeOfDay: "04:30 PM", mealName: "Nutrient Crunch", description: "Sliced bell peppers with guacamole", calories: "140 kcal", completed: false }, { id: "sat_d", timeOfDay: "07:30 PM", mealName: "Seafood & Greens", description: "Baked shrimp with zucchini noodles & pesto", calories: "380 kcal", completed: false }] },
+          { day: "Sunday", meals: [{ id: "sun_b", timeOfDay: "08:00 AM", mealName: "Sunday Protein Waffle", description: "Gluten-free protein waffle topped with fresh raspberries", calories: "330 kcal", completed: false }, { id: "sun_l", timeOfDay: "01:30 PM", mealName: "Clean Grain Bowl", description: "Brown rice with sautéed kale, roasted sweet potato & chickpeas", calories: "480 kcal", completed: false }, { id: "sun_s", timeOfDay: "04:30 PM", mealName: "Light Evening Snack", description: "Handful of macadamia nuts or sliced pear", calories: "150 kcal", completed: false }, { id: "sun_d", timeOfDay: "07:30 PM", mealName: "Detox Soup & Protein", description: "Unsalted vegetable soup with grilled chicken breast", calories: "350 kcal", completed: false }] }
+        ];
+      }
+
+      const updatedWeekly = weekly.map((dp: any) => {
+        if (dp.day === currentDayName) {
+          return {
+            ...dp,
+            meals: dp.meals.map((m: any) => m.id === target.originalId ? { ...m, completed: newChecked } : m)
+          };
+        }
+        return dp;
+      });
+
+      const jsonStr = JSON.stringify(updatedWeekly);
+      localStorage.setItem("medipredict_weekly_diet_plan", jsonStr);
+      api.post("/lifestyle/diet", {
+        dietPlanJson: jsonStr,
+        waterGlasses: parseInt(localStorage.getItem("medipredict_water_glasses") || "4")
+      }).catch(() => {});
+
+    } else if (target.type === "exercise") {
+      let weekly: any[] = [];
       const savedWeeklyEx = localStorage.getItem("medipredict_weekly_exercise_plan");
       if (savedWeeklyEx) {
-        try {
-          const weekly = JSON.parse(savedWeeklyEx);
-          const updatedWeekly = weekly.map((dp: any) => {
-            if (dp.day === currentDayName) {
-              return {
-                ...dp,
-                tasks: dp.tasks.map((t: any) => t.id === target.originalId ? { ...t, completed: newChecked } : t)
-              };
-            }
-            return dp;
-          });
-          localStorage.setItem("medipredict_weekly_exercise_plan", JSON.stringify(updatedWeekly));
-        } catch (e) {}
+        try { weekly = JSON.parse(savedWeeklyEx); } catch (e) {}
       }
+
+      if (!Array.isArray(weekly) || weekly.length === 0) {
+        weekly = [
+          { day: "Monday", tasks: [{ id: "mon_e1", category: "Warm-Up", taskName: "Dynamic Joint Mobility & Deep Breathing", duration: "10 mins", intensity: "Low", completed: false }, { id: "mon_e2", category: "Cardio", taskName: "Brisk Walking / Low-Impact Cycling", duration: "30 mins", intensity: "Moderate", completed: false }, { id: "mon_e3", category: "Cool-Down", taskName: "Full-Body Static Muscle Stretching", duration: "10 mins", intensity: "Low", completed: false }] },
+          { day: "Tuesday", tasks: [{ id: "tue_e1", category: "Warm-Up", taskName: "Arm Swings & Torso Twists", duration: "10 mins", intensity: "Low", completed: false }, { id: "tue_e2", category: "Strength & Core", taskName: "Light Resistance & Seated Knee Extensions", duration: "25 mins", intensity: "Moderate", completed: false }, { id: "tue_e3", category: "Cool-Down", taskName: "Restorative Seated Quiet Rest", duration: "10 mins", intensity: "Low", completed: false }] },
+          { day: "Wednesday", tasks: [{ id: "wed_e1", category: "Warm-Up", taskName: "Pursed-Lip Breathing & Shoulder Shrugs", duration: "10 mins", intensity: "Low", completed: false }, { id: "wed_e2", category: "Aerobic Phase", taskName: "Conversational Pace Swimming or Walking", duration: "30 mins", intensity: "Moderate", completed: false }, { id: "wed_e3", category: "Cool-Down", taskName: "Hamstring & Chest Opener Stretch", duration: "10 mins", intensity: "Low", completed: false }] },
+          { day: "Thursday", tasks: [{ id: "thu_e1", category: "Warm-Up", taskName: "Neck Rolls & Slow Indoor Walk", duration: "10 mins", intensity: "Low", completed: false }, { id: "thu_e2", category: "Cardio & Mobility", taskName: "Stationary Bicycle Workout", duration: "25 mins", intensity: "Moderate", completed: false }, { id: "thu_e3", category: "Cool-Down", taskName: "Standing Calf & Quad Stretches", duration: "10 mins", intensity: "Low", completed: false }] },
+          { day: "Friday", tasks: [{ id: "fri_e1", category: "Warm-Up", taskName: "Seated Joint Mobilizers & Breathing", duration: "10 mins", intensity: "Low", completed: false }, { id: "fri_e2", category: "Cardio", taskName: "Brisk Treadmill Walking", duration: "30 mins", intensity: "Moderate", completed: false }, { id: "fri_e3", category: "Cool-Down", taskName: "Child's Pose & Quiet Seated Rest", duration: "10 mins", intensity: "Low", completed: false }] },
+          { day: "Saturday", tasks: [{ id: "sat_e1", category: "Warm-Up", taskName: "Shoulder Rolls & Torso Rotations", duration: "10 mins", intensity: "Low", completed: false }, { id: "sat_e2", category: "Low-Impact Active", taskName: "Nature Leisure Walk or Water Aerobics", duration: "35 mins", intensity: "Moderate", completed: false }, { id: "sat_e3", category: "Cool-Down", taskName: "Full Body Restorative Relaxation", duration: "10 mins", intensity: "Low", completed: false }] },
+          { day: "Sunday", tasks: [{ id: "sun_e1", category: "Warm-Up", taskName: "Gentle Seated Mobility & Breathing", duration: "10 mins", intensity: "Low", completed: false }, { id: "sun_e2", category: "Restorative Activity", taskName: "Light Yoga / Stretching & Meditation", duration: "25 mins", intensity: "Low", completed: false }, { id: "sun_e3", category: "Cool-Down", taskName: "Mindful Meditation & Relaxation", duration: "10 mins", intensity: "Low", completed: false }] }
+        ];
+      }
+
+      const updatedWeekly = weekly.map((dp: any) => {
+        if (dp.day === currentDayName) {
+          return {
+            ...dp,
+            tasks: dp.tasks.map((t: any) => t.id === target.originalId ? { ...t, completed: newChecked } : t)
+          };
+        }
+        return dp;
+      });
+
+      const jsonStr = JSON.stringify(updatedWeekly);
+      localStorage.setItem("medipredict_weekly_exercise_plan", jsonStr);
+      api.post("/lifestyle/exercise", {
+        exercisePlanJson: jsonStr,
+        workoutMinutes: parseInt(localStorage.getItem("medipredict_active_minutes") || "30")
+      }).catch(() => {});
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -121,9 +121,16 @@ export default function ExerciseScreen({ navigation }: any) {
     year: "numeric",
   });
 
+  const lastLocalMutationRef = useRef<number>(0);
+
   const fetchBackendExercisePlan = async () => {
     const token = await AsyncStorage.getItem("accessToken");
     if (!token) return;
+
+    if (Date.now() - lastLocalMutationRef.current < 3000) {
+      return;
+    }
+
     try {
       const res = await api.get("/lifestyle/plan");
       if (res && res.data) {
@@ -183,9 +190,10 @@ export default function ExerciseScreen({ navigation }: any) {
           tasks: dp.tasks.map((t) => ({ ...t, completed: false })),
         }));
         await AsyncStorage.setItem("medipredict_exercise_last_date", todayStr);
+        await saveWeeklyPlan(loadedPlan);
+      } else {
+        setWeeklyPlan(loadedPlan);
       }
-
-      setWeeklyPlan(loadedPlan);
 
       const savedMins = await AsyncStorage.getItem("medipredict_active_minutes");
       if (savedMins) {
@@ -200,6 +208,7 @@ export default function ExerciseScreen({ navigation }: any) {
   };
 
   const saveWeeklyPlan = async (newPlan: DayExercisePlan[], minsVal = activeMinutes) => {
+    lastLocalMutationRef.current = Date.now();
     setWeeklyPlan(newPlan);
     try {
       await AsyncStorage.setItem("medipredict_weekly_exercise_plan", JSON.stringify(newPlan));

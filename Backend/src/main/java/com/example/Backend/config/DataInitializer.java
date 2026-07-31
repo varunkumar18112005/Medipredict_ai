@@ -35,6 +35,38 @@ public class DataInitializer {
                 userRepository.save(admin);
                 log.info("Default admin user created: {} / Admin@1234", adminEmail);
             }
+
+            String demoEmail = "user@gmail.com";
+            if (!userRepository.existsByEmail(demoEmail)) {
+                User user = User.builder()
+                        .firstName("Demo")
+                        .lastName("User")
+                        .email(demoEmail)
+                        .password(passwordEncoder.encode("User@1234"))
+                        .healthId("MP-0002")
+                        .role(User.Role.USER)
+                        .status(User.AccountStatus.ACTIVE)
+                        .emailVerified(true)
+                        .build();
+                userRepository.save(user);
+                log.info("Default demo user created: {} / User@1234", demoEmail);
+            }
+
+            String testEmail = "test@gmail.com";
+            if (!userRepository.existsByEmail(testEmail)) {
+                User testUser = User.builder()
+                        .firstName("Test")
+                        .lastName("User")
+                        .email(testEmail)
+                        .password(passwordEncoder.encode("Test@1234"))
+                        .healthId("MP-0003")
+                        .role(User.Role.USER)
+                        .status(User.AccountStatus.ACTIVE)
+                        .emailVerified(true)
+                        .build();
+                userRepository.save(testUser);
+                log.info("Default test user created: {} / Test@1234", testEmail);
+            }
         };
     }
 }

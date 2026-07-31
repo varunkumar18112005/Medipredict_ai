@@ -57,6 +57,8 @@ export default function SidebarHeader() {
     const menuItems = [
         { label: 'Dashboard', route: 'Home', icon: 'home-outline' as const },
         { label: 'Risk Predictor', route: 'DiseaseSelection', icon: 'pulse-outline' as const },
+        { label: 'Diet Planner', route: 'Diet', icon: 'restaurant-outline' as const },
+        { label: 'Exercise Planner', route: 'Exercise', icon: 'barbell-outline' as const },
         { label: 'Scheduler', route: 'Scheduler', icon: 'calendar-outline' as const },
         { label: 'History Logs', route: 'History', icon: 'clipboard-outline' as const },
         { label: 'Medical Vault', route: 'Reports', icon: 'document-text-outline' as const },

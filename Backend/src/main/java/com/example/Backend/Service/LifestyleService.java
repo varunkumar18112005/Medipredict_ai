@@ -45,6 +45,7 @@ public class LifestyleService {
         if (waterGlasses != null) {
             plan.setWaterGlasses(waterGlasses);
         }
+        plan.setUpdatedAt(java.time.LocalDateTime.now());
 
         UserLifestylePlan saved = lifestylePlanRepository.save(plan);
         return getLifestylePlan(user);
@@ -61,6 +62,7 @@ public class LifestyleService {
         if (workoutMinutes != null) {
             plan.setWorkoutMinutes(workoutMinutes);
         }
+        plan.setUpdatedAt(java.time.LocalDateTime.now());
 
         UserLifestylePlan saved = lifestylePlanRepository.save(plan);
         return getLifestylePlan(user);

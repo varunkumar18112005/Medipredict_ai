@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/services/api";
 
@@ -109,22 +109,36 @@ export default function DietPlannerPage() {
     year: "numeric",
   });
 
+  const lastLocalMutationRef = useRef<number>(0);
+
   const fetchBackendPlan = async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
     if (!token) return;
+
+    // Skip poll overwrite if user modified local state within last 3 seconds
+    if (Date.now() - lastLocalMutationRef.current < 3000) {
+      return;
+    }
+
     try {
       const res = await api.get("/lifestyle/plan");
       if (res && res.data) {
         if (res.data.dietPlanJson) {
-          const parsed = JSON.parse(res.data.dietPlanJson);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setWeeklyPlan(parsed);
-            localStorage.setItem("medipredict_weekly_diet_plan", JSON.stringify(parsed));
+          const currentLocalStr = localStorage.getItem("medipredict_weekly_diet_plan");
+          if (res.data.dietPlanJson !== currentLocalStr) {
+            const parsed = JSON.parse(res.data.dietPlanJson);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setWeeklyPlan(parsed);
+              localStorage.setItem("medipredict_weekly_diet_plan", res.data.dietPlanJson);
+            }
           }
         }
         if (res.data.waterGlasses !== undefined && res.data.waterGlasses !== null) {
-          setWaterGlasses(res.data.waterGlasses);
-          localStorage.setItem("medipredict_water_glasses", res.data.waterGlasses.toString());
+          const currentWaterStr = localStorage.getItem("medipredict_water_glasses");
+          if (res.data.waterGlasses.toString() !== currentWaterStr) {
+            setWaterGlasses(res.data.waterGlasses);
+            localStorage.setItem("medipredict_water_glasses", res.data.waterGlasses.toString());
+          }
         }
       }
     } catch {
@@ -156,9 +170,10 @@ export default function DietPlannerPage() {
         meals: dp.meals.map(m => ({ ...m, completed: false }))
       }));
       localStorage.setItem("medipredict_diet_last_date", todayStr);
+      saveWeeklyPlan(loadedPlan);
+    } else {
+      setWeeklyPlan(loadedPlan);
     }
-    
-    setWeeklyPlan(loadedPlan);
 
     const savedWater = localStorage.getItem("medipredict_water_glasses");
     if (savedWater) {
@@ -178,6 +193,7 @@ export default function DietPlannerPage() {
 
   // Sync state to Backend & LocalStorage
   const saveWeeklyPlan = (newPlan: DayPlan[], waterVal = waterGlasses) => {
+    lastLocalMutationRef.current = Date.now();
     setWeeklyPlan(newPlan);
     localStorage.setItem("medipredict_weekly_diet_plan", JSON.stringify(newPlan));
     

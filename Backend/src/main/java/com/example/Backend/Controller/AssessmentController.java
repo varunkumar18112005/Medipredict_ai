@@ -40,24 +40,52 @@ public class AssessmentController {
     public ResponseEntity<Page<AssessmentDto.HistoryResponse>> getHistory(
             @AuthenticationPrincipal UserDetails userDetails,
             @PageableDefault(size = 10, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(
-                assessmentService.getHistory(userDetails.getUsername(), pageable));
+        if (userDetails == null || userDetails.getUsername() == null) {
+            return ResponseEntity.ok(Page.empty());
+        }
+        try {
+            return ResponseEntity.ok(assessmentService.getHistory(userDetails.getUsername(), pageable));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Page.empty());
+        }
     }
 
     @GetMapping("/stats")
     @Operation(summary = "Get summary stats — total assessments, avg risk, trend")
     public ResponseEntity<AssessmentDto.SummaryStats> getStats(
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(
-                assessmentService.getSummaryStats(userDetails.getUsername()));
+        if (userDetails == null || userDetails.getUsername() == null) {
+            return ResponseEntity.ok(AssessmentDto.SummaryStats.builder()
+                    .totalAssessments(0)
+                    .avgRiskScore(0.0)
+                    .avgRiskLevel("UNKNOWN")
+                    .byDiseaseType(java.util.Collections.emptyMap())
+                    .build());
+        }
+        try {
+            return ResponseEntity.ok(assessmentService.getSummaryStats(userDetails.getUsername()));
+        } catch (Exception e) {
+            return ResponseEntity.ok(AssessmentDto.SummaryStats.builder()
+                    .totalAssessments(0)
+                    .avgRiskScore(0.0)
+                    .avgRiskLevel("UNKNOWN")
+                    .byDiseaseType(java.util.Collections.emptyMap())
+                    .build());
+        }
     }
 
     @GetMapping("/trends")
     @Operation(summary = "Get historical risk score trends grouped by disease type")
     public ResponseEntity<Map<String, java.util.List<AssessmentDto.TrendPoint>>> getTrends(
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(
-                assessmentService.getTrends(userDetails.getUsername()));
+        if (userDetails == null || userDetails.getUsername() == null) {
+            return ResponseEntity.ok(java.util.Collections.emptyMap());
+        }
+        try {
+            return ResponseEntity.ok(assessmentService.getTrends(userDetails.getUsername()));
+        } catch (Exception e) {
+            return ResponseEntity.ok(java.util.Collections.emptyMap());
+        }
     }
 
     @GetMapping("/{id:\\d+}")

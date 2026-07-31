@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -127,9 +127,16 @@ export default function DietScreen({ navigation }: any) {
     year: "numeric",
   });
 
+  const lastLocalMutationRef = useRef<number>(0);
+
   const fetchBackendPlan = async () => {
     const token = await AsyncStorage.getItem("accessToken");
     if (!token) return;
+
+    if (Date.now() - lastLocalMutationRef.current < 3000) {
+      return;
+    }
+
     try {
       const res = await api.get("/lifestyle/plan");
       if (res && res.data) {
@@ -189,9 +196,10 @@ export default function DietScreen({ navigation }: any) {
           meals: dp.meals.map((m) => ({ ...m, completed: false })),
         }));
         await AsyncStorage.setItem("medipredict_diet_last_date", todayStr);
+        await saveWeeklyPlan(loadedPlan);
+      } else {
+        setWeeklyPlan(loadedPlan);
       }
-
-      setWeeklyPlan(loadedPlan);
 
       const savedWater = await AsyncStorage.getItem("medipredict_water_glasses");
       if (savedWater) {
@@ -206,6 +214,7 @@ export default function DietScreen({ navigation }: any) {
   };
 
   const saveWeeklyPlan = async (newPlan: DayPlan[], waterVal = waterGlasses) => {
+    lastLocalMutationRef.current = Date.now();
     setWeeklyPlan(newPlan);
     try {
       await AsyncStorage.setItem("medipredict_weekly_diet_plan", JSON.stringify(newPlan));

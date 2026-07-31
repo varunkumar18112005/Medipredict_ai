@@ -55,7 +55,8 @@ public class SecurityConfig {
                         "/routes/**",
                         "/countries",
                         "/states",
-                        "/districts"
+                        "/districts",
+                        "/error"
         };
 
         @Bean
@@ -65,6 +66,12 @@ public class SecurityConfig {
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .exceptionHandling(ex -> ex
+                                                .authenticationEntryPoint((request, response, authException) -> {
+                                                        response.setStatus(401);
+                                                        response.setContentType("application/json");
+                                                        response.getWriter().write("{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"Please log in to access this resource\"}");
+                                                }))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(PUBLIC_ENDPOINTS).permitAll()

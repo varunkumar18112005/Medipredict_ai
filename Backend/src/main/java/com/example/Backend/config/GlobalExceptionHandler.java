@@ -33,10 +33,11 @@ public class GlobalExceptionHandler {
     }
 
     // ── Business rule violations ──────────────────────────────────────
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArg(IllegalArgumentException ex) {
+    @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, RuntimeException.class})
+    public ResponseEntity<ErrorResponse> handleIllegalArg(Exception ex) {
+        log.warn("Runtime business exception: {}", ex.getMessage());
         return ResponseEntity.badRequest().body(
-                ErrorResponse.of(HttpStatus.BAD_REQUEST, ex.getMessage(), null));
+                ErrorResponse.of(HttpStatus.BAD_REQUEST, ex.getMessage() != null ? ex.getMessage() : "Request failed", null));
     }
 
     // ── Resource not found ────────────────────────────────────────────

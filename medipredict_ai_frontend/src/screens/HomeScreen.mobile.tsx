@@ -7,6 +7,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useDrawer } from '../context/DrawerContext';
 import { assessmentService } from '../services/assessments';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../services/api';
 import Svg, { Path, Circle, Defs, LinearGradient as SvgLinearGradient, Stop, Line, G } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
@@ -129,6 +130,32 @@ export default function HomeScreen({ navigation }: any) {
                 console.warn("Dashboard trends notice:", trendErr);
             }
 
+            // 0. Cloud Sync from Spring Boot Backend - Only update if changed
+            let hasDataChanged = false;
+            try {
+                const cloudRes = await api.get("/lifestyle/plan");
+                if (cloudRes && cloudRes.data) {
+                    const oldDiet = await AsyncStorage.getItem("medipredict_weekly_diet_plan");
+                    const oldEx = await AsyncStorage.getItem("medipredict_weekly_exercise_plan");
+                    if (cloudRes.data.dietPlanJson && cloudRes.data.dietPlanJson !== oldDiet) {
+                        await AsyncStorage.setItem("medipredict_weekly_diet_plan", cloudRes.data.dietPlanJson);
+                        hasDataChanged = true;
+                    }
+                    if (cloudRes.data.exercisePlanJson && cloudRes.data.exercisePlanJson !== oldEx) {
+                        await AsyncStorage.setItem("medipredict_weekly_exercise_plan", cloudRes.data.exercisePlanJson);
+                        hasDataChanged = true;
+                    }
+                }
+            } catch {
+                // Quiet fallback
+            }
+
+            const isInitialized = await AsyncStorage.getItem("medipredict_mobile_home_initialized");
+            if (!hasDataChanged && isInitialized && (dietTasks.length > 0 || exerciseTasks.length > 0)) {
+                return;
+            }
+            await AsyncStorage.setItem("medipredict_mobile_home_initialized", "true");
+
             // Sync Diet & Exercise routines with 7-Day Weekly Storage
             const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
             const currentDayName = DAYS_OF_WEEK[(new Date().getDay() + 6) % 7];
@@ -231,6 +258,11 @@ export default function HomeScreen({ navigation }: any) {
             return;
         }
         fetchData();
+
+        const timer = setInterval(() => {
+            fetchData();
+        }, 3000);
+        return () => clearInterval(timer);
     }, [user]);
 
     const toggleDietTask = async (id: string) => {
@@ -239,6 +271,27 @@ export default function HomeScreen({ navigation }: any) {
         try {
             await AsyncStorage.setItem("medipredict_diet_items", JSON.stringify(updated));
             await AsyncStorage.setItem("medipredict_diet_plan", JSON.stringify(updated));
+            const storedWeeklyDiet = await AsyncStorage.getItem("medipredict_weekly_diet_plan");
+            if (storedWeeklyDiet) {
+                const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+                const currentDayName = DAYS_OF_WEEK[(new Date().getDay() + 6) % 7];
+                const weekly = JSON.parse(storedWeeklyDiet);
+                const updatedWeekly = weekly.map((dp: any) => {
+                    if (dp.day === currentDayName) {
+                        return {
+                            ...dp,
+                            meals: dp.meals.map((m: any) => m.id === id ? { ...m, completed: !m.completed } : m)
+                        };
+                    }
+                    return dp;
+                });
+                const jsonStr = JSON.stringify(updatedWeekly);
+                await AsyncStorage.setItem("medipredict_weekly_diet_plan", jsonStr);
+                api.post("/lifestyle/diet", {
+                    dietPlanJson: jsonStr,
+                    waterGlasses: 4
+                }).catch(() => {});
+            }
         } catch (e) {}
     };
 
@@ -248,6 +301,27 @@ export default function HomeScreen({ navigation }: any) {
         try {
             await AsyncStorage.setItem("medipredict_exercise_tasks", JSON.stringify(updated));
             await AsyncStorage.setItem("medipredict_exercise_plan", JSON.stringify(updated));
+            const storedWeeklyEx = await AsyncStorage.getItem("medipredict_weekly_exercise_plan");
+            if (storedWeeklyEx) {
+                const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+                const currentDayName = DAYS_OF_WEEK[(new Date().getDay() + 6) % 7];
+                const weekly = JSON.parse(storedWeeklyEx);
+                const updatedWeekly = weekly.map((dp: any) => {
+                    if (dp.day === currentDayName) {
+                        return {
+                            ...dp,
+                            tasks: dp.tasks.map((t: any) => t.id === id ? { ...t, completed: !t.completed } : t)
+                        };
+                    }
+                    return dp;
+                });
+                const jsonStr = JSON.stringify(updatedWeekly);
+                await AsyncStorage.setItem("medipredict_weekly_exercise_plan", jsonStr);
+                api.post("/lifestyle/exercise", {
+                    exercisePlanJson: jsonStr,
+                    workoutMinutes: 30
+                }).catch(() => {});
+            }
         } catch (e) {}
     };
 

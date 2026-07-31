@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import BorderGlow from "@/components/BorderGlow";
 import api from "@/services/api";
@@ -104,22 +104,36 @@ export default function ExercisePlannerPage() {
     year: "numeric",
   });
 
+  const lastLocalMutationRef = useRef<number>(0);
+
   const fetchBackendExercisePlan = async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
     if (!token) return;
+
+    // Skip poll overwrite if user modified local state within last 3 seconds
+    if (Date.now() - lastLocalMutationRef.current < 3000) {
+      return;
+    }
+
     try {
       const res = await api.get("/lifestyle/plan");
       if (res && res.data) {
         if (res.data.exercisePlanJson) {
-          const parsed = JSON.parse(res.data.exercisePlanJson);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setWeeklyPlan(parsed);
-            localStorage.setItem("medipredict_weekly_exercise_plan", JSON.stringify(parsed));
+          const currentLocalStr = localStorage.getItem("medipredict_weekly_exercise_plan");
+          if (res.data.exercisePlanJson !== currentLocalStr) {
+            const parsed = JSON.parse(res.data.exercisePlanJson);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setWeeklyPlan(parsed);
+              localStorage.setItem("medipredict_weekly_exercise_plan", res.data.exercisePlanJson);
+            }
           }
         }
         if (res.data.workoutMinutes !== undefined && res.data.workoutMinutes !== null) {
-          setActiveMinutes(res.data.workoutMinutes);
-          localStorage.setItem("medipredict_active_minutes", res.data.workoutMinutes.toString());
+          const currentMinsStr = localStorage.getItem("medipredict_active_minutes");
+          if (res.data.workoutMinutes.toString() !== currentMinsStr) {
+            setActiveMinutes(res.data.workoutMinutes);
+            localStorage.setItem("medipredict_active_minutes", res.data.workoutMinutes.toString());
+          }
         }
       }
     } catch {
@@ -151,9 +165,10 @@ export default function ExercisePlannerPage() {
         tasks: dp.tasks.map(t => ({ ...t, completed: false }))
       }));
       localStorage.setItem("medipredict_exercise_last_date", todayStr);
+      saveWeeklyPlan(loadedPlan);
+    } else {
+      setWeeklyPlan(loadedPlan);
     }
-
-    setWeeklyPlan(loadedPlan);
 
     const savedMins = localStorage.getItem("medipredict_active_minutes");
     if (savedMins) {
@@ -171,7 +186,9 @@ export default function ExercisePlannerPage() {
     };
   }, [todayStr]);
 
+  // Sync state to Backend & LocalStorage
   const saveWeeklyPlan = (newPlan: DayExercisePlan[], minsVal = activeMinutes) => {
+    lastLocalMutationRef.current = Date.now();
     setWeeklyPlan(newPlan);
     localStorage.setItem("medipredict_weekly_exercise_plan", JSON.stringify(newPlan));
 

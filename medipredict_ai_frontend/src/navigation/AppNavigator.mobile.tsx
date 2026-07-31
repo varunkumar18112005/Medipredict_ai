@@ -31,7 +31,7 @@ import SideNavbar from '../components/SideNavbar';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export default function AppNavigator() {
+export default function AppNavigator({ currentRouteName }: { currentRouteName?: string }) {
   const { colors } = useTheme();
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -75,13 +75,15 @@ export default function AppNavigator() {
           )}
         </Stack.Navigator>
 
-        {isAuthenticated && <DrawerNavWrapper />}
+        {isAuthenticated && <DrawerNavWrapper currentRouteName={currentRouteName} />}
       </View>
     </DrawerProvider>
   );
 }
 
-function DrawerNavWrapper() {
-  const navigation = require('@react-navigation/native').useNavigation();
-  return <SideNavbar navigation={navigation} />;
+import { useNavigation } from '@react-navigation/native';
+
+function DrawerNavWrapper({ currentRouteName }: { currentRouteName?: string }) {
+  const navigation = useNavigation();
+  return <SideNavbar navigation={navigation} currentRouteName={currentRouteName} />;
 }
