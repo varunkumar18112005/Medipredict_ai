@@ -4,8 +4,8 @@ export interface RegisterRequest {
     lastName: string;
     email: string;
     password: string;
-    dateOfBirth: string;
-    gender: string;
+    dateOfBirth?: string;
+    gender?: string;
 }
 
 export interface LoginRequest {

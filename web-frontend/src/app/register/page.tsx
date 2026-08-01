@@ -26,6 +26,13 @@ export default function RegisterPage() {
       setError("Please agree to the Terms and Conditions to proceed.");
       return;
     }
+
+    const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/;
+    if (!STRONG_PASSWORD_REGEX.test(password)) {
+      setError("Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character (e.g. User@1234). Spaces are not allowed.");
+      return;
+    }
+
     setError("");
     setMessage("");
     setLoading(true);
@@ -158,7 +165,7 @@ export default function RegisterPage() {
                   type="text"
                   className="input-3d"
                   value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  onChange={(e) => setFirstName(e.target.value.replace(/[^a-zA-Z\s'-]/g, ""))}
                   placeholder="John"
                   required
                 />
@@ -171,7 +178,7 @@ export default function RegisterPage() {
                   type="text"
                   className="input-3d"
                   value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  onChange={(e) => setLastName(e.target.value.replace(/[^a-zA-Z\s'-]/g, ""))}
                   placeholder="Doe"
                   required
                 />
@@ -201,7 +208,7 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   className="input-3d"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e.target.value.replace(/\s/g, ""))}
                   placeholder="••••••••"
                   required
                   style={{ paddingRight: "42px" }}

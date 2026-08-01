@@ -291,7 +291,7 @@ export default function SettingsPage() {
                   type="text"
                   className="input-3d"
                   value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  onChange={(e) => setFirstName(e.target.value.replace(/[^a-zA-Z\s'-]/g, ""))}
                   placeholder="First name"
                   required
                 />
@@ -305,7 +305,7 @@ export default function SettingsPage() {
                   type="text"
                   className="input-3d"
                   value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  onChange={(e) => setLastName(e.target.value.replace(/[^a-zA-Z\s'-]/g, ""))}
                   placeholder="Last name"
                   required
                 />

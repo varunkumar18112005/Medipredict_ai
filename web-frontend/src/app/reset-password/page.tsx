@@ -25,6 +25,12 @@ function ResetPasswordForm() {
       return;
     }
     
+    const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/;
+    if (!STRONG_PASSWORD_REGEX.test(newPassword)) {
+      setError("Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character (e.g. User@1234). Spaces are not allowed.");
+      return;
+    }
+
     setError("");
     setSuccess("");
     setLoading(true);

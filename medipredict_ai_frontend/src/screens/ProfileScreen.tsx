@@ -97,11 +97,11 @@ export default function ProfileScreen({ navigation }: any) {
                     <View style={styles.row}>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>FIRST NAME</Text>
-                            <TextInput style={styles.input} value={firstName} onChangeText={setFirstName} placeholderTextColor="#94A3B8" />
+                            <TextInput style={styles.input} value={firstName} onChangeText={(txt) => setFirstName(txt.replace(/[^a-zA-Z\s'-]/g, ''))} placeholderTextColor="#94A3B8" />
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>LAST NAME</Text>
-                            <TextInput style={styles.input} value={lastName} onChangeText={setLastName} placeholderTextColor="#94A3B8" />
+                            <TextInput style={styles.input} value={lastName} onChangeText={(txt) => setLastName(txt.replace(/[^a-zA-Z\s'-]/g, ''))} placeholderTextColor="#94A3B8" />
                         </View>
                     </View>
 
