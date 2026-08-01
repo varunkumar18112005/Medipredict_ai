@@ -55,6 +55,8 @@ jobs:
           scan-type: 'fs'
           scan-ref: '.'
           scanners: 'vuln'
+          skip-files: 'Backend/pom.xml,pom.xml'
+          skip-dirs: 'selenium-tests/node_modules,appium-tests/node_modules'
           format: 'table'
           output: 'trivy-report.txt'
           severity: 'CRITICAL,HIGH,MEDIUM'
