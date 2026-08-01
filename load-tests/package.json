@@ -1,14 +1,12 @@
 {
   "name": "load-tests",
   "version": "1.0.0",
-  "description": "Baseline Load Testing Suite for MediPredict AI Backend (100 Virtual Users / 1 Minute)",
-  "main": "load-test.js",
+  "description": "Baseline & Load Testing Suite (100 concurrent users for 60 seconds)",
+  "main": "baseline-load-test.js",
   "scripts": {
-    "test": "node load-test.js",
-    "report": "node generate_load_test_report.js"
+    "test": "node baseline-load-test.js"
   },
   "dependencies": {
-    "autocannon": "^7.15.0",
     "xlsx": "^0.18.5"
   }
 }

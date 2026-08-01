@@ -1,0 +1,14 @@
+{
+  "validUser": {
+    "email": "user@gmail.com",
+    "password": "User@1234"
+  },
+  "invalidUsers": [
+    { "email": "invalid@gmail.com", "password": "WrongPass123" },
+    { "email": "user@gmail.com", "password": "WrongPass999" }
+  ],
+  "dietPlan": {
+    "waterGoal": 8,
+    "meal": "Oatmeal with Almond Milk"
+  }
+}

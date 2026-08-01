@@ -1,0 +1,13 @@
+{
+  "name": "automation",
+  "version": "1.0.0",
+  "description": "Enterprise Android Appium Automation Framework with Page Object Model & Multi-Format Reporting",
+  "main": "tests/android-e2e-suite.js",
+  "scripts": {
+    "test": "node tests/android-e2e-suite.js"
+  },
+  "dependencies": {
+    "webdriverio": "^8.32.0",
+    "xlsx": "^0.18.5"
+  }
+}

@@ -1,0 +1,46 @@
+name: Deploy Automation & Security Reports to GitHub Pages
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy-pages:
+    name: Build & Publish GitHub Pages Dashboard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build All Reports & Site Site Dashboard
+        run: |
+          mkdir -p _site
+          cd automation && npm install && npm test && cd ..
+          cd selenium-tests && npm install && npm test && cd ..
+          cd load-tests && npm install && npm test && cd ..
+          cd security-tests && npm install && npm test && cd ..
+          
+          cp -r automation/reports/* _site/ || true
+          cp selenium-tests/selenium_test_report.xlsx _site/ || true
+          cp load-tests/load_test_report.xlsx _site/ || true
+          cp security-tests/backend_security_report.xlsx _site/ || true
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
