@@ -6,9 +6,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
-  id-token: write
 
 jobs:
   deploy-pages:
@@ -24,23 +23,18 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Build All Reports & Site Site Dashboard
+      - name: Collect All Reports & Dashboard Assets
         run: |
           mkdir -p _site
-          cd automation && npm install && npm test && cd ..
-          cd selenium-tests && npm install && npm test && cd ..
-          cd load-tests && npm install && npm test && cd ..
-          cd security-tests && npm install && npm test && cd ..
-          
           cp -r automation/reports/* _site/ || true
           cp selenium-tests/selenium_test_report.xlsx _site/ || true
+          cp appium-tests/appium_test_report.xlsx _site/ || true
           cp load-tests/load_test_report.xlsx _site/ || true
           cp security-tests/backend_security_report.xlsx _site/ || true
 
-      - name: Upload GitHub Pages Artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy Reports to GitHub Pages (gh-pages branch)
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: '_site'
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          force_orphan: true
