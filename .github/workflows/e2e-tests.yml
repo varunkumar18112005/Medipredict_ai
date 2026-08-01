@@ -1,0 +1,67 @@
+name: E2E Test Automation Pipeline (Selenium & Appium)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  selenium-e2e:
+    name: Selenium Web E2E Test Suite (300 Cases)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Selenium Test Dependencies
+        run: |
+          cd selenium-tests
+          npm install
+
+      - name: Execute 300 Selenium E2E Test Cases & Generate Excel Report
+        run: |
+          cd selenium-tests
+          npm test
+
+      - name: Upload Selenium Excel Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-test-report
+          path: selenium-tests/selenium_test_report.xlsx
+
+  appium-e2e:
+    name: Appium Mobile E2E Test Suite (300 Cases)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Appium Test Dependencies
+        run: |
+          cd appium-tests
+          npm install
+
+      - name: Execute 300 Appium Mobile E2E Test Cases & Generate Excel Report
+        run: |
+          cd appium-tests
+          npm test
+
+      - name: Upload Appium Mobile Excel Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: appium-test-report
+          path: appium-tests/appium_test_report.xlsx

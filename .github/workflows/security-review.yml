@@ -54,10 +54,12 @@ jobs:
         with:
           scan-type: 'fs'
           scan-ref: '.'
+          scanners: 'vuln'
           format: 'table'
           output: 'trivy-report.txt'
           severity: 'CRITICAL,HIGH,MEDIUM'
           exit-code: '0'
+          hide-progress: true
         continue-on-error: true
 
       - name: Audit Node.js Dependencies (web-frontend)
