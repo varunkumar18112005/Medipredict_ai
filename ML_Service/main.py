@@ -119,6 +119,11 @@ class AssessmentRequest(BaseModel):
     mch: Optional[float] = 29.0
     ferritin: Optional[float] = 100.0
 
+@app.get("/")
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "service": "MediPredict ML Microservice", "version": "1.0"}
+
 @app.post("/predict")
 def predict_risk(req: AssessmentRequest):
     dtype = req.diseaseType.upper()

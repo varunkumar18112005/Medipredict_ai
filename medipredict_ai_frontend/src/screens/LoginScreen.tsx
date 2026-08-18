@@ -23,7 +23,17 @@ export default function LoginScreen({ navigation }: any) {
         try {
             await login({ email, password });
         } catch (error: any) {
-            Alert.alert('Login Failed', error.response?.data?.message || 'Invalid credentials');
+            const isNetworkError = !error.response || error.message === 'Network Error';
+            const serverMsg = error.response?.data?.message || error.response?.data?.error;
+            
+            if (isNetworkError) {
+                Alert.alert(
+                    'Network Error',
+                    'Unable to reach backend server at http://172.20.10.3:8085.\n\n1. Ensure your iPhone is connected to the SAME Wi-Fi / Personal Hotspot as your computer.\n2. Ensure your PC firewall allows local network access.'
+                );
+            } else {
+                Alert.alert('Login Failed', serverMsg || error.message || 'Invalid email or password');
+            }
         } finally {
             setLoading(false);
         }

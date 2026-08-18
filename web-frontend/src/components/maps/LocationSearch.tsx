@@ -25,8 +25,8 @@ export default function LocationSearch({
   const [districts, setDistricts] = useState<District[]>([]);
 
   const [selectedCountryId, setSelectedCountryId] = useState<string>('IN');
-  const [selectedStateId, setSelectedStateId] = useState<string>('AP');
-  const [selectedDistrictId, setSelectedDistrictId] = useState<string>('AP_TPT');
+  const [selectedStateId, setSelectedStateId] = useState<string>('');
+  const [selectedDistrictId, setSelectedDistrictId] = useState<string>('');
 
   const [loadingCountries, setLoadingCountries] = useState<boolean>(false);
   const [loadingStates, setLoadingStates] = useState<boolean>(false);

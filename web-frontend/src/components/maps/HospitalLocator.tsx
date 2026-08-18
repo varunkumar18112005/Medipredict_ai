@@ -88,9 +88,9 @@ const DynamicLeafletMap = dynamic(
 );
 
 export default function HospitalLocator() {
-  const [centerLat, setCenterLat] = useState<number>(13.6288); // Default Tirupati
+  const [centerLat, setCenterLat] = useState<number>(13.6288);
   const [centerLon, setCenterLon] = useState<number>(79.4192);
-  const [cityName, setCityName] = useState<string>('Tirupati');
+  const [cityName, setCityName] = useState<string>('Current Location');
 
   const [radiusMeters, setRadiusMeters] = useState<number>(20000);
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('ALL');
@@ -100,8 +100,9 @@ export default function HospitalLocator() {
   const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
   const [activeRoute, setActiveRoute] = useState<RouteResponse | null>(null);
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasGeoInitialized, setHasGeoInitialized] = useState<boolean>(false);
 
   // Pure Renderer Hospital Fetcher (Calls Spring Boot GET /api/v1/hospitals/nearby exclusively)
   const loadHospitalsForCoordinates = useCallback(
@@ -131,11 +132,6 @@ export default function HospitalLocator() {
     },
     []
   );
-
-  // Initial load on mount or parameter changes
-  useEffect(() => {
-    loadHospitalsForCoordinates(centerLat, centerLon, radiusMeters, selectedCategory, sortBy);
-  }, [centerLat, centerLon, radiusMeters, selectedCategory, sortBy, loadHospitalsForCoordinates]);
 
   // Handle Location Search (Country -> State -> District)
   const handleLocationSearch = async (
@@ -173,11 +169,11 @@ export default function HospitalLocator() {
   };
 
   // Handle Use Current Location (Browser GPS)
-  const handleUseCurrentLocation = () => {
+  const handleUseCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      setError('Unable to locate hospitals.');
-      setHospitals([]);
+      setError('Geolocation is not supported by your browser.');
       setLoading(false);
+      loadHospitalsForCoordinates(centerLat, centerLon, radiusMeters, selectedCategory, sortBy);
       return;
     }
 
@@ -191,25 +187,41 @@ export default function HospitalLocator() {
         console.log(`[Hospital Locator] GPS Geolocation success: Lat ${latitude}, Lon ${longitude}`);
         setCenterLat(latitude);
         setCenterLon(longitude);
-        setCityName('GPS Current Location');
+        setCityName('Current Location');
+        setHasGeoInitialized(true);
         await loadHospitalsForCoordinates(latitude, longitude, radiusMeters, selectedCategory, sortBy);
       },
       async (err) => {
         console.warn('[Hospital Locator] Geolocation error:', err);
         let errorMsg = 'GPS location permission was blocked or unavailable.';
         if (err.code === err.PERMISSION_DENIED) {
-          errorMsg = 'Location permission was blocked by your browser. Please click the 🔒 icon in your browser address bar to allow location access, or select your State and District from the dropdowns.';
+          errorMsg = 'Location permission was blocked by your browser. Please allow location access, or select your State and District manually.';
         } else if (err.code === err.POSITION_UNAVAILABLE) {
           errorMsg = 'GPS location is unavailable on this device.';
         } else if (err.code === err.TIMEOUT) {
           errorMsg = 'GPS location request timed out.';
         }
         setError(errorMsg);
+        setHasGeoInitialized(true);
         await loadHospitalsForCoordinates(centerLat, centerLon, radiusMeters, selectedCategory, sortBy);
       },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
-  };
+  }, [centerLat, centerLon, radiusMeters, selectedCategory, sortBy, loadHospitalsForCoordinates]);
+
+  // Initial load on mount: automatically trigger browser GPS location request
+  useEffect(() => {
+    if (!hasGeoInitialized) {
+      handleUseCurrentLocation();
+    }
+  }, [hasGeoInitialized, handleUseCurrentLocation]);
+
+  // Reload when search parameters change (radius, category, sort order)
+  useEffect(() => {
+    if (hasGeoInitialized) {
+      loadHospitalsForCoordinates(centerLat, centerLon, radiusMeters, selectedCategory, sortBy);
+    }
+  }, [radiusMeters, selectedCategory, sortBy]);
 
   // View Driving Route Handler (POST /api/v1/routes)
   const handleViewRoute = async (hospital: Hospital) => {

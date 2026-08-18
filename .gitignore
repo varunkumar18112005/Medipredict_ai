@@ -47,3 +47,9 @@ tunnel.txt
 website_screenshots/
 stitch_screens/
 download_screens.py
+
+# Environment Files
+.env
+.env.*
+!.env.example
+

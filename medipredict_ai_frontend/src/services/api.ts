@@ -5,15 +5,30 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 const getBaseUrl = (): string => {
-    let LOCAL_IP = '172.23.82.12';
-    const hostUri = Constants.expoConfig?.hostUri;
-    if (hostUri) {
-        LOCAL_IP = hostUri.split(':')[0];
+    const TUNNEL_URL = process.env.EXPO_PUBLIC_TUNNEL_URL || 'https://7a69fc57514b9554-223-187-123-127.serveousercontent.com/api/v1';
+    const PORT = process.env.EXPO_PUBLIC_API_PORT || '8085';
+    let host = '10.245.43.15';
+
+    if (process.env.EXPO_PUBLIC_API_URL && process.env.EXPO_PUBLIC_API_URL.startsWith('http')) {
+        // If explicit full API URL is provided, prefer it
+        const customUrl = process.env.EXPO_PUBLIC_API_URL;
+        console.log("-> AXIOS BASE URL (from ENV):", customUrl);
+        return customUrl;
     }
-    const PORT = '8085';
+
+    if (Platform.OS === 'android') {
+        host = '10.0.2.2';
+    } else {
+        const hostUri = Constants.expoConfig?.hostUri;
+        if (hostUri) {
+            host = hostUri.split(':')[0];
+        }
+    }
+
     const url = __DEV__
-        ? (Platform.OS === 'web' ? `http://localhost:${PORT}/api/v1` : `http://${LOCAL_IP}:${PORT}/api/v1`)
-        : 'https://api.medipredict.com/v1';
+        ? (host && host !== 'localhost' ? `http://${host}:${PORT}/api/v1` : TUNNEL_URL)
+        : TUNNEL_URL;
+
     console.log("-> AXIOS BASE URL CONFIGURED AS:", url);
     return url;
 };
