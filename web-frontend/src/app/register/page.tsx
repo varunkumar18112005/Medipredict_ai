@@ -47,11 +47,10 @@ export default function RegisterPage() {
       setMessage(`Security code successfully dispatched to ${email}.`);
       setStep(2);
     } catch (err: any) {
-      console.error(err);
-      setError(
-        err.response?.data?.message || 
-        "Failed to initiate registration. Please verify details."
-      );
+      const serverMsg = typeof err.response?.data === 'string' 
+        ? err.response.data 
+        : (err.response?.data?.message || err.response?.data?.error || err.message);
+      setError(serverMsg || "Failed to initiate registration. Please verify details.");
     } finally {
       setLoading(false);
     }
