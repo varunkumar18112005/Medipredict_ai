@@ -24,6 +24,9 @@ public class EmailService {
     @Value("${spring.mail.username:${SPRING_MAIL_USERNAME:medipredictai1@gmail.com}}")
     private String fromEmail;
 
+    @Value("${spring.mail.password:${SPRING_MAIL_PASSWORD:}}")
+    private String mailPassword;
+
     @Value("${resend.api-key:${RESEND_API_KEY:${EMAIL_API_KEY:}}}")
     private String resendApiKey;
 
@@ -41,12 +44,14 @@ public class EmailService {
         String bodyText = "Welcome to MediPredict AI!\n\nYour OTP for registration is: " + otp
                 + "\n\nPlease enter this code to verify your email address.\n\nDo not share this OTP with anyone.";
 
+        // 1. Try HTTPS API (Port 443 - Recommended for Cloud Hosts like Render)
         if (tryHttpApiSending(toEmail, subject, bodyText, otp)) {
             return;
         }
 
-        try {
-            if (mailSender != null) {
+        // 2. Try SMTP only if password is provided
+        if (mailSender != null && mailPassword != null && !mailPassword.trim().isEmpty()) {
+            try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setFrom(fromEmail);
                 message.setTo(toEmail);
@@ -55,11 +60,14 @@ public class EmailService {
                 mailSender.send(message);
                 log.info("OTP email sent successfully via SMTP to {}", toEmail);
                 return;
+            } catch (Exception e) {
+                log.warn("SMTP email send failed for {}: {}. Falling back to server log. OTP: [{}]", toEmail, e.getMessage(), otp);
             }
-        } catch (Exception e) {
-            log.warn("SMTP email send failed for {}: {}. OTP generated: [{}]", toEmail, e.getMessage(), otp);
+        } else {
+            log.info("No SMTP password or HTTP API Key set. Skipping SMTP socket connection.");
         }
 
+        // 3. Server Log Fallback
         log.info("==================================================");
         log.info("[OTP SERVER LOG FALLBACK] Target Email: {}", toEmail);
         log.info("[OTP CODE]: {}", otp);
@@ -80,8 +88,8 @@ public class EmailService {
             return;
         }
 
-        try {
-            if (mailSender != null) {
+        if (mailSender != null && mailPassword != null && !mailPassword.trim().isEmpty()) {
+            try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setFrom(fromEmail);
                 message.setTo(toEmail);
@@ -90,9 +98,9 @@ public class EmailService {
                 mailSender.send(message);
                 log.info("Password reset email sent successfully via SMTP to {}", toEmail);
                 return;
+            } catch (Exception e) {
+                log.warn("Failed to send password reset email via SMTP to {}. Reset OTP: [{}]. Error: {}", toEmail, resetToken, e.getMessage());
             }
-        } catch (Exception e) {
-            log.warn("Failed to send password reset email via SMTP to {}. Reset OTP: [{}]. Error: {}", toEmail, resetToken, e.getMessage());
         }
 
         log.info("==================================================");
