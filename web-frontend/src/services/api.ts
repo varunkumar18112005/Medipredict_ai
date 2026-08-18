@@ -2,6 +2,10 @@ import axios from 'axios';
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://medipredict-backend-cq9n.onrender.com/api/v1';
 
+if (typeof window !== 'undefined') {
+    console.log("🌐 MediPredict API Active Base URL:", API_BASE_URL);
+}
+
 const api = axios.create({
     baseURL: API_BASE_URL,
     timeout: 30000,
