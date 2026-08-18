@@ -8,52 +8,156 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+
 @Service
 @Slf4j
 public class EmailService {
 
-    @Autowired
+    @Autowired(required = false)
     private JavaMailSender mailSender;
 
     @Value("${spring.mail.username:${SPRING_MAIL_USERNAME:medipredictai1@gmail.com}}")
     private String fromEmail;
 
+    @Value("${resend.api-key:${RESEND_API_KEY:${EMAIL_API_KEY:}}}")
+    private String resendApiKey;
+
+    @Value("${brevo.api-key:${BREVO_API_KEY:}}")
+    private String brevoApiKey;
+
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(5))
+            .build();
+
     @Async
     public void sendOtpEmail(String toEmail, String otp) {
         log.info("Sending OTP email to: {}", toEmail);
+        String subject = "Your MediPredict AI Registration OTP";
+        String bodyText = "Welcome to MediPredict AI!\n\nYour OTP for registration is: " + otp
+                + "\n\nPlease enter this code to verify your email address.\n\nDo not share this OTP with anyone.";
+
+        if (tryHttpApiSending(toEmail, subject, bodyText, otp)) {
+            return;
+        }
+
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(toEmail);
-            message.setSubject("Your MediPredict AI Registration OTP");
-            message.setText("Welcome to MediPredict AI!\n\nYour OTP for registration is: " + otp
-                    + "\n\nPlease enter this code to verify your email address.\n\nDo not share this OTP with anyone.");
-            mailSender.send(message);
-            log.info("OTP email sent successfully via SMTP to {}", toEmail);
+            if (mailSender != null) {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(fromEmail);
+                message.setTo(toEmail);
+                message.setSubject(subject);
+                message.setText(bodyText);
+                mailSender.send(message);
+                log.info("OTP email sent successfully via SMTP to {}", toEmail);
+                return;
+            }
         } catch (Exception e) {
             log.warn("SMTP email send failed for {}: {}. OTP generated: [{}]", toEmail, e.getMessage(), otp);
-            // Do not throw Exception so registration flow proceeds smoothly even if cloud firewall blocks outbound SMTP port 587
         }
+
+        log.info("==================================================");
+        log.info("[OTP SERVER LOG FALLBACK] Target Email: {}", toEmail);
+        log.info("[OTP CODE]: {}", otp);
+        log.info("==================================================");
     }
 
     @Async
     public void sendPasswordResetEmail(String toEmail, String resetToken) {
         log.info("Sending password reset email to: {}", toEmail);
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(toEmail);
-            message.setSubject("MediPredict AI - Password Reset OTP");
-            message.setText("You requested a password reset for your MediPredict AI account.\n\n"
-                    + "Your 6-digit password reset OTP is:\n\n"
-                    + resetToken + "\n\n"
-                    + "Please enter this code on the password reset page to change your password.\n\n"
-                    + "If you did not request this, please ignore this email.\nThis OTP will expire in 1 hour.");
-            mailSender.send(message);
-            log.info("Password reset email sent successfully via SMTP to {}", toEmail);
-        } catch (Exception e) {
-            log.warn("Failed to send password reset email via SMTP to {}. Using server log fallback. Reset OTP: [{}]. Error: {}", toEmail, resetToken, e.getMessage());
-            // Do not throw RuntimeException so reset flow is not blocked by SMTP connection timeouts
+        String subject = "MediPredict AI - Password Reset OTP";
+        String bodyText = "You requested a password reset for your MediPredict AI account.\n\n"
+                + "Your 6-digit password reset OTP is:\n\n"
+                + resetToken + "\n\n"
+                + "Please enter this code on the password reset page to change your password.\n\n"
+                + "If you did not request this, please ignore this email.\nThis OTP will expire in 1 hour.";
+
+        if (tryHttpApiSending(toEmail, subject, bodyText, resetToken)) {
+            return;
         }
+
+        try {
+            if (mailSender != null) {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(fromEmail);
+                message.setTo(toEmail);
+                message.setSubject(subject);
+                message.setText(bodyText);
+                mailSender.send(message);
+                log.info("Password reset email sent successfully via SMTP to {}", toEmail);
+                return;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to send password reset email via SMTP to {}. Reset OTP: [{}]. Error: {}", toEmail, resetToken, e.getMessage());
+        }
+
+        log.info("==================================================");
+        log.info("[RESET OTP SERVER LOG FALLBACK] Target Email: {}", toEmail);
+        log.info("[RESET OTP CODE]: {}", resetToken);
+        log.info("==================================================");
+    }
+
+    private boolean tryHttpApiSending(String toEmail, String subject, String bodyText, String code) {
+        // Option A: Resend API (HTTPS Port 443)
+        if (resendApiKey != null && !resendApiKey.trim().isEmpty()) {
+            try {
+                String jsonPayload = String.format(
+                        "{\"from\":\"MediPredict AI <onboarding@resend.dev>\",\"to\":[\"%s\"],\"subject\":\"%s\",\"text\":\"%s\"}",
+                        toEmail, subject, bodyText.replace("\n", "\\n")
+                );
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://api.resend.com/emails"))
+                        .header("Authorization", "Bearer " + resendApiKey.trim())
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                        .timeout(Duration.ofSeconds(5))
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                    log.info("OTP email successfully delivered to {} via Resend HTTP API (Port 443)", toEmail);
+                    return true;
+                } else {
+                    log.warn("Resend HTTP API returned status {}: {}", response.statusCode(), response.body());
+                }
+            } catch (Exception e) {
+                log.warn("Resend HTTP API error: {}", e.getMessage());
+            }
+        }
+
+        // Option B: Brevo API (HTTPS Port 443)
+        if (brevoApiKey != null && !brevoApiKey.trim().isEmpty()) {
+            try {
+                String jsonPayload = String.format(
+                        "{\"sender\":{\"name\":\"MediPredict AI\",\"email\":\"%s\"},\"to\":[{\"email\":\"%s\"}],\"subject\":\"%s\",\"textContent\":\"%s\"}",
+                        fromEmail, toEmail, subject, bodyText.replace("\n", "\\n")
+                );
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                        .header("api-key", brevoApiKey.trim())
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                        .timeout(Duration.ofSeconds(5))
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                    log.info("OTP email successfully delivered to {} via Brevo HTTP API (Port 443)", toEmail);
+                    return true;
+                } else {
+                    log.warn("Brevo HTTP API returned status {}: {}", response.statusCode(), response.body());
+                }
+            } catch (Exception e) {
+                log.warn("Brevo HTTP API error: {}", e.getMessage());
+            }
+        }
+
+        return false;
     }
 }
