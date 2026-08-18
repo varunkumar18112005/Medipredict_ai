@@ -64,7 +64,7 @@ public class EmailService {
                 log.warn("SMTP email send failed for {}: {}. Falling back to server log. OTP: [{}]", toEmail, e.getMessage(), otp);
             }
         } else {
-            log.info("No SMTP password or HTTP API Key set. Skipping SMTP socket connection.");
+            log.info("No SMTP password set. Skipping raw SMTP socket connection.");
         }
 
         // 3. Server Log Fallback
@@ -113,59 +113,76 @@ public class EmailService {
         // Option A: Resend API (HTTPS Port 443)
         if (resendApiKey != null && !resendApiKey.trim().isEmpty()) {
             try {
+                String cleanApiKey = resendApiKey.trim();
+                log.info("Attempting to send email via Resend API (Key length: {}) to {}", cleanApiKey.length(), toEmail);
+
                 String jsonPayload = String.format(
-                        "{\"from\":\"MediPredict AI <onboarding@resend.dev>\",\"to\":[\"%s\"],\"subject\":\"%s\",\"text\":\"%s\"}",
-                        toEmail, subject, bodyText.replace("\n", "\\n")
+                        "{\"from\":\"onboarding@resend.dev\",\"to\":[\"%s\"],\"subject\":\"%s\",\"text\":\"%s\"}",
+                        escapeJson(toEmail), escapeJson(subject), escapeJson(bodyText)
                 );
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create("https://api.resend.com/emails"))
-                        .header("Authorization", "Bearer " + resendApiKey.trim())
+                        .header("Authorization", "Bearer " + cleanApiKey)
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
-                        .timeout(Duration.ofSeconds(5))
+                        .timeout(Duration.ofSeconds(8))
                         .build();
 
                 HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                    log.info("OTP email successfully delivered to {} via Resend HTTP API (Port 443)", toEmail);
+                    log.info("✅ OTP email successfully delivered to {} via Resend HTTP API (Port 443)! Response: {}", toEmail, response.body());
                     return true;
                 } else {
-                    log.warn("Resend HTTP API returned status {}: {}", response.statusCode(), response.body());
+                    log.warn("❌ Resend HTTP API returned HTTP status {}: {}", response.statusCode(), response.body());
                 }
             } catch (Exception e) {
-                log.warn("Resend HTTP API error: {}", e.getMessage());
+                log.warn("❌ Resend HTTP API exception: {}", e.getMessage(), e);
             }
+        } else {
+            log.info("RESEND_API_KEY is empty or not set.");
         }
 
         // Option B: Brevo API (HTTPS Port 443)
         if (brevoApiKey != null && !brevoApiKey.trim().isEmpty()) {
             try {
+                String cleanApiKey = brevoApiKey.trim();
+                log.info("Attempting to send email via Brevo API to {}", toEmail);
+
                 String jsonPayload = String.format(
                         "{\"sender\":{\"name\":\"MediPredict AI\",\"email\":\"%s\"},\"to\":[{\"email\":\"%s\"}],\"subject\":\"%s\",\"textContent\":\"%s\"}",
-                        fromEmail, toEmail, subject, bodyText.replace("\n", "\\n")
+                        escapeJson(fromEmail), escapeJson(toEmail), escapeJson(subject), escapeJson(bodyText)
                 );
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
-                        .header("api-key", brevoApiKey.trim())
+                        .header("api-key", cleanApiKey)
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
-                        .timeout(Duration.ofSeconds(5))
+                        .timeout(Duration.ofSeconds(8))
                         .build();
 
                 HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                    log.info("OTP email successfully delivered to {} via Brevo HTTP API (Port 443)", toEmail);
+                    log.info("✅ OTP email successfully delivered to {} via Brevo HTTP API (Port 443)! Response: {}", toEmail, response.body());
                     return true;
                 } else {
-                    log.warn("Brevo HTTP API returned status {}: {}", response.statusCode(), response.body());
+                    log.warn("❌ Brevo HTTP API returned HTTP status {}: {}", response.statusCode(), response.body());
                 }
             } catch (Exception e) {
-                log.warn("Brevo HTTP API error: {}", e.getMessage());
+                log.warn("❌ Brevo HTTP API exception: {}", e.getMessage(), e);
             }
         }
 
         return false;
+    }
+
+    private String escapeJson(String input) {
+        if (input == null) return "";
+        return input.replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("\r", "")
+                    .replace("\n", "\\n")
+                    .replace("\t", "\\t");
     }
 }
