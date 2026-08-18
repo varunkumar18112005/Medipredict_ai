@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
@@ -17,6 +18,7 @@ public class EmailService {
     @Value("${spring.mail.username:${SPRING_MAIL_USERNAME:medipredictai1@gmail.com}}")
     private String fromEmail;
 
+    @Async
     public void sendOtpEmail(String toEmail, String otp) {
         log.info("Sending OTP email to: {}", toEmail);
         try {
@@ -34,6 +36,7 @@ public class EmailService {
         }
     }
 
+    @Async
     public void sendPasswordResetEmail(String toEmail, String resetToken) {
         log.info("Sending password reset email to: {}", toEmail);
         try {
