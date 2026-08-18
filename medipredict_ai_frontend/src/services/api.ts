@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 const getBaseUrl = (): string => {
-    const TUNNEL_URL = process.env.EXPO_PUBLIC_TUNNEL_URL || 'https://7a69fc57514b9554-223-187-123-127.serveousercontent.com/api/v1';
+    const TUNNEL_URL = process.env.EXPO_PUBLIC_TUNNEL_URL || 'https://medipredict-backend-cq9n.onrender.com/api/v1';
     const PORT = process.env.EXPO_PUBLIC_API_PORT || '8085';
     let host = '10.245.43.15';
 

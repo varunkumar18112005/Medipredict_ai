@@ -6,14 +6,14 @@ const getBackendBase = () => {
   if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_URL) {
     return `${process.env.NEXT_PUBLIC_API_URL}/hospitals`;
   }
-  return 'http://localhost:8085/api/v1/hospitals';
+  return 'https://medipredict-backend-cq9n.onrender.com/api/v1/hospitals';
 };
 
 const getRootApiBase = () => {
   if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
-  return 'http://localhost:8085/api/v1';
+  return 'https://medipredict-backend-cq9n.onrender.com/api/v1';
 };
 
 export interface RouteResponse {
