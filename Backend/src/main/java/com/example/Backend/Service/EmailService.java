@@ -29,8 +29,8 @@ public class EmailService {
             mailSender.send(message);
             log.info("OTP email sent successfully via SMTP to {}", toEmail);
         } catch (Exception e) {
-            log.warn("Failed to send OTP email via SMTP to {}. Using server log fallback. OTP Code: [{}]. Error: {}", toEmail, otp, e.getMessage());
-            // Do not throw RuntimeException so registration flow is not blocked by SMTP connection timeouts
+            log.error("Failed to send OTP email via SMTP to {}. Error: {}", toEmail, e.getMessage(), e);
+            throw new IllegalStateException("Failed to send OTP email via SMTP: " + e.getMessage(), e);
         }
     }
 
