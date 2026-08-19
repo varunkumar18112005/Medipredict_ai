@@ -110,10 +110,46 @@ public class EmailService {
     }
 
     private boolean tryHttpApiSending(String toEmail, String subject, String bodyText, String code) {
-        // Option A: Resend API (HTTPS Port 443)
-        if (resendApiKey != null && !resendApiKey.trim().isEmpty()) {
+        String effectiveBrevoKey = getEnvOrProp(brevoApiKey, "BREVO_API_KEY");
+        String effectiveResendKey = getEnvOrProp(resendApiKey, "RESEND_API_KEY");
+
+        // Option A: Brevo API (HTTPS Port 443 - Recommended: sends to ALL recipients)
+        if (effectiveBrevoKey != null && !effectiveBrevoKey.trim().isEmpty()) {
             try {
-                String cleanApiKey = resendApiKey.trim();
+                String cleanApiKey = effectiveBrevoKey.trim();
+                log.info("Attempting to send email via Brevo API (Key length: {}) to {}", cleanApiKey.length(), toEmail);
+
+                String senderEmailStr = (fromEmail != null && fromEmail.contains("@")) ? fromEmail : "medipredictai1@gmail.com";
+
+                String jsonPayload = String.format(
+                        "{\"sender\":{\"name\":\"MediPredict AI\",\"email\":\"%s\"},\"to\":[{\"email\":\"%s\"}],\"subject\":\"%s\",\"textContent\":\"%s\"}",
+                        escapeJson(senderEmailStr), escapeJson(toEmail), escapeJson(subject), escapeJson(bodyText)
+                );
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                        .header("api-key", cleanApiKey)
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                        .timeout(Duration.ofSeconds(8))
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                    log.info("✅ OTP email successfully delivered to {} via Brevo HTTP API (Port 443)! Response: {}", toEmail, response.body());
+                    return true;
+                } else {
+                    log.warn("❌ Brevo HTTP API returned status {}: {}", response.statusCode(), response.body());
+                }
+            } catch (Exception e) {
+                log.warn("❌ Brevo HTTP API exception: {}", e.getMessage(), e);
+            }
+        }
+
+        // Option B: Resend API (HTTPS Port 443)
+        if (effectiveResendKey != null && !effectiveResendKey.trim().isEmpty()) {
+            try {
+                String cleanApiKey = effectiveResendKey.trim();
                 log.info("Attempting to send email via Resend API (Key length: {}) to {}", cleanApiKey.length(), toEmail);
 
                 String jsonPayload = String.format(
@@ -134,47 +170,23 @@ public class EmailService {
                     log.info("✅ OTP email successfully delivered to {} via Resend HTTP API (Port 443)! Response: {}", toEmail, response.body());
                     return true;
                 } else {
-                    log.warn("❌ Resend HTTP API returned HTTP status {}: {}", response.statusCode(), response.body());
+                    log.warn("❌ Resend HTTP API returned status {}: {}", response.statusCode(), response.body());
                 }
             } catch (Exception e) {
                 log.warn("❌ Resend HTTP API exception: {}", e.getMessage(), e);
             }
-        } else {
-            log.info("RESEND_API_KEY is empty or not set.");
         }
 
-        // Option B: Brevo API (HTTPS Port 443)
-        if (brevoApiKey != null && !brevoApiKey.trim().isEmpty()) {
-            try {
-                String cleanApiKey = brevoApiKey.trim();
-                log.info("Attempting to send email via Brevo API to {}", toEmail);
-
-                String jsonPayload = String.format(
-                        "{\"sender\":{\"name\":\"MediPredict AI\",\"email\":\"%s\"},\"to\":[{\"email\":\"%s\"}],\"subject\":\"%s\",\"textContent\":\"%s\"}",
-                        escapeJson(fromEmail), escapeJson(toEmail), escapeJson(subject), escapeJson(bodyText)
-                );
-
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
-                        .header("api-key", cleanApiKey)
-                        .header("Content-Type", "application/json")
-                        .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
-                        .timeout(Duration.ofSeconds(8))
-                        .build();
-
-                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                    log.info("✅ OTP email successfully delivered to {} via Brevo HTTP API (Port 443)! Response: {}", toEmail, response.body());
-                    return true;
-                } else {
-                    log.warn("❌ Brevo HTTP API returned HTTP status {}: {}", response.statusCode(), response.body());
-                }
-            } catch (Exception e) {
-                log.warn("❌ Brevo HTTP API exception: {}", e.getMessage(), e);
-            }
-        }
-
+        log.info("Neither BREVO_API_KEY nor RESEND_API_KEY was valid/active.");
         return false;
+    }
+
+    private String getEnvOrProp(String propValue, String envName) {
+        if (propValue != null && !propValue.trim().isEmpty()) {
+            return propValue.trim();
+        }
+        String sysEnv = System.getenv(envName);
+        return (sysEnv != null && !sysEnv.trim().isEmpty()) ? sysEnv.trim() : null;
     }
 
     private String escapeJson(String input) {
