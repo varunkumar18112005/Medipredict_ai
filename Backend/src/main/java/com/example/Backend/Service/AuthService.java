@@ -43,7 +43,11 @@ public class AuthService {
             throw new IllegalArgumentException("Email already registered: " + request.getEmail());
         }
         String otp = otpService.generateOtp(request.getEmail());
-        emailService.sendOtpEmail(request.getEmail(), otp);
+        try {
+            emailService.sendOtpEmail(request.getEmail(), otp);
+        } catch (Exception ex) {
+            log.warn("Could not deliver OTP email for {}: {}. OTP remains active in server logs.", request.getEmail(), ex.getMessage());
+        }
     }
 
     public AuthDto.AuthResponse verifyRegistration(AuthDto.VerifyOtpRequest request) {
@@ -159,16 +163,12 @@ public class AuthService {
         user.setPasswordResetTokenExpiry(LocalDateTime.now().plusHours(1));
         userRepository.save(user);
 
-        // FALLBACK: Print OTP to console for local development
-        System.out.println("\n=======================================================");
-        System.out.println("              DEVELOPMENT RESET OTP                    ");
-        System.out.println("=======================================================");
-        System.out.println("Email: " + email);
-        System.out.println("OTP: " + token);
-        System.out.println("=======================================================\n");
-
-        emailService.sendPasswordResetEmail(email, token);
-        log.info("Password reset OTP generated and email sent for: {}", email);
+        try {
+            emailService.sendPasswordResetEmail(email, token);
+            log.info("Password reset OTP generated and email sent for: {}", email);
+        } catch (Exception ex) {
+            log.warn("Password reset OTP generated for {}, but email sending encountered an issue: {}", email, ex.getMessage());
+        }
     }
 
     public void resetPassword(AuthDto.ResetPasswordRequest request) {

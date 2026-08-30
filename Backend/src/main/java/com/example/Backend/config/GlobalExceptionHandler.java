@@ -1,5 +1,6 @@
 package com.example.Backend.config;
 
+import com.example.Backend.Service.EmailDeliveryException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,13 @@ public class GlobalExceptionHandler {
     }
 
     // ── Business rule violations ──────────────────────────────────────
+    @ExceptionHandler(EmailDeliveryException.class)
+    public ResponseEntity<ErrorResponse> handleEmailDelivery(EmailDeliveryException ex) {
+        log.warn("Email delivery failed: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
+                ErrorResponse.of(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage(), null));
+    }
+
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, RuntimeException.class})
     public ResponseEntity<ErrorResponse> handleIllegalArg(Exception ex) {
         log.warn("Runtime business exception: {}", ex.getMessage());

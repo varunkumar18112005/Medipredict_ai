@@ -32,10 +32,17 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       console.error(err);
-      setError(
-        err.response?.data?.message ||
-        "Invalid email or password. Please try again."
-      );
+      if (err.code === 'ECONNABORTED' || (err.message && err.message.includes('timeout'))) {
+        setError(
+          "⏳ Cloud backend server is warming up from sleep mode (Render cold start). Please wait 10-15 seconds and click Sign In again."
+        );
+      } else {
+        setError(
+          err.response?.data?.message ||
+          err.userFriendlyMessage ||
+          "Invalid email or password. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
     }

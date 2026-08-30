@@ -8,7 +8,7 @@ if (typeof window !== 'undefined') {
 
 const api = axios.create({
     baseURL: API_BASE_URL,
-    timeout: 30000,
+    timeout: 90000, // 90 seconds to allow Render free-tier cloud backend cold starts
     headers: {
         'Content-Type': 'application/json',
     },
@@ -50,18 +50,25 @@ api.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
-// Response interceptor: handle 401/403 + auto-refresh
+// Response interceptor: handle 401/403 + auto-refresh & timeout handling
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+
+        // Catch timeout / server cold start errors
+        if (error.code === 'ECONNABORTED' || (error.message && error.message.includes('timeout'))) {
+            console.warn('⚠️ MediPredict API Timeout: Cloud server waking up from spin-down.');
+            error.userFriendlyMessage = 'The cloud server took longer than expected to respond (Render server waking up). Please try again in a moment.';
+        }
+
         if (error.response && (error.response.status === 401 || error.response.status === 403) && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
                 const refreshToken = getRefreshToken();
                 if (refreshToken) {
                     // Call Auth refresh endpoint
-                    const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
+                    const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken }, { timeout: 90000 });
                     
                     // Update credentials
                     localStorage.setItem('accessToken', data.accessToken);

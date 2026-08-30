@@ -357,7 +357,7 @@ export default function HistoryPage() {
           <span style={{ fontSize: "2rem", display: "block", marginBottom: "15px" }}>🗃️</span>
           <h3 style={{ fontSize: "1.2rem", color: "#1e293b", marginBottom: "8px" }}>No Diagnostic History Found</h3>
           <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginBottom: "24px" }}>
-            Initialize an AI diagnostic pipeline to generate diagnostic data telemetry.
+            Complete an AI health assessment to generate diagnostic records.
           </p>
           <Link href="/dashboard" className="btn-3d" style={{ padding: "10px 24px", fontSize: "0.8rem" }}>
             Start Assessment
@@ -409,7 +409,7 @@ export default function HistoryPage() {
                   <span style={{ fontSize: "1.5rem", marginBottom: "10px" }}>📈</span>
                   <span style={{ fontSize: "0.9rem", fontWeight: 800, color: "#263238", marginBottom: "4px" }}>Telemetry Graph Pending</span>
                   <p style={{ fontSize: "0.8rem", margin: 0, maxWidth: "420px", color: "#64748B" }}>
-                    Visual tracking requires at least 2 completed assessments in the <strong>{formatDiseaseName(activeDisease)}</strong> pipeline. Please submit another assessment to trace trends.
+                    Visual tracking requires at least 2 completed assessments in the <strong>{formatDiseaseName(activeDisease)}</strong> category. Please submit another assessment to trace trends.
                   </p>
                 </div>
               ) : (
@@ -571,7 +571,7 @@ export default function HistoryPage() {
                           fontWeight: 800,
                           color: hoveredPoint.riskLevel === "HIGH" ? "var(--error)" : hoveredPoint.riskLevel === "MODERATE" ? "var(--primary)" : "var(--success)"
                         }}>
-                          {hoveredPoint.riskScore}% {hoveredPoint.riskLevel}
+                          {Number(hoveredPoint.riskScore).toFixed(1)}% {hoveredPoint.riskLevel}
                         </span>
                       </div>
                     </div>

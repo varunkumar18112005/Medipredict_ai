@@ -26,4 +26,10 @@ public class OtpService {
         }
         return false;
     }
+
+    public void invalidateOtp(String email) {
+        if (email != null) {
+            otpStore.remove(email.toLowerCase().trim());
+        }
+    }
 }

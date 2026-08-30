@@ -448,7 +448,7 @@ export default function RegisterPage() {
               <div style={{ background: "#F8FAFC", padding: "14px", borderRadius: "10px", border: "1px solid #E2E8F0" }}>
                 <h4 style={{ color: "#263238", fontWeight: 800, marginBottom: "6px", fontSize: "0.95rem" }}>3. User Account Responsibilities</h4>
                 <p style={{ margin: 0 }}>
-                  By maintaining an account, you agree to provide accurate biological indicators when executing risk prediction pipelines. You are responsible for maintaining the confidentiality of your health portal authentication tokens and for all activities that occur under your session credentials.
+                  By maintaining an account, you agree to provide accurate biological indicators when executing risk prediction assessments. You are responsible for maintaining the confidentiality of your health portal authentication tokens and for all activities that occur under your session credentials.
                 </p>
               </div>
 
@@ -462,7 +462,7 @@ export default function RegisterPage() {
               <div style={{ background: "#F8FAFC", padding: "14px", borderRadius: "10px", border: "1px solid #E2E8F0" }}>
                 <h4 style={{ color: "#263238", fontWeight: 800, marginBottom: "6px", fontSize: "0.95rem" }}>5. Updates & Modifications</h4>
                 <p style={{ margin: 0 }}>
-                  MediPredict AI reserves the right to refine machine learning pipelines, update system parameters, or adjust these Terms & Conditions to reflect technical or regulatory improvements. Continued use of the platform constitutes agreement to the updated terms.
+                  MediPredict AI reserves the right to refine machine learning models, update system parameters, or adjust these Terms & Conditions to reflect technical or regulatory improvements. Continued use of the platform constitutes agreement to the updated terms.
                 </p>
               </div>
             </div>

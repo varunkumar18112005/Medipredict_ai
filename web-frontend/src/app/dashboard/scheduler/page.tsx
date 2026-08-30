@@ -341,7 +341,7 @@ export default function SchedulerPage() {
                 ]}
                 value={newReminderType}
                 onChange={setNewReminderType}
-                label="Inference Target Pipeline"
+                label="Target Health Category"
               />
 
               <div>

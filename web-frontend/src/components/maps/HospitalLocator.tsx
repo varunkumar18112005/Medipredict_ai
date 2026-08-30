@@ -362,12 +362,6 @@ export default function HospitalLocator() {
         {/* Right Column: Leaflet Map */}
         <div style={{ position: 'sticky', top: '20px' }}>
           <div className="card-3d" style={{ padding: '16px', background: '#FFFFFF', borderRadius: '20px', border: '1px solid #E2E8F0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#1E293B', margin: 0 }}>
-                🗺️ Google / OpenStreetMap Locator
-              </h4>
-            </div>
-
             <div style={{ height: '540px', width: '100%', position: 'relative' }}>
               <DynamicLeafletMap
                 centerLat={centerLat}

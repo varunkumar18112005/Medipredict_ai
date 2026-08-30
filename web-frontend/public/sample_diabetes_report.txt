@@ -1,0 +1,33 @@
+================================================================================
+                    METROPOLITAN CLINICAL LABORATORIES
+                       DIAGNOSTIC PATHOLOGY REPORT
+================================================================================
+
+Patient Name:      John Doe                       Date of Test:    22-Aug-2026
+Patient ID:        MP-89214                       Age / Gender:    45 / Male
+Referred By:       Dr. Sarah Jenkins, MD          Report Status:   FINAL
+
+--------------------------------------------------------------------------------
+TEST NAME                      RESULT       UNIT         REFERENCE RANGE
+--------------------------------------------------------------------------------
+
+GLYCOMETABOLIC PANEL
+Fasting Blood Glucose          135.5        mg/dL        [ 70.0 - 99.0 ]   (HIGH)
+HbA1c (Glycated Hemoglobin)    6.8          %            [ 4.0 - 5.6 ]     (ELEVATED)
+Insulin Level (Fasting)        18.5         uU/mL        [ 2.6 - 24.9 ]    (NORMAL)
+
+CLINICAL VITALS & BIOMARKERS
+Blood Pressure (Systolic)      132          mmHg         [ 90 - 120 ]      (ELEVATED)
+Body Mass Index (BMI)          27.4         kg/m²        [ 18.5 - 24.9 ]   (OVERWEIGHT)
+Age                            45           Years        --
+
+--------------------------------------------------------------------------------
+INTERPRETATION & CLINICAL NOTES:
+- Fasting Blood Glucose (135.5 mg/dL) exceeds the standard normal fasting cutoff of 99 mg/dL.
+- HbA1c value of 6.8% indicates impaired glycemic regulation consistent with clinical evaluation guidelines.
+- Continuous lifestyle management and clinical correlation recommended.
+
+================================================================================
+Pathologist Signature: Dr. A. Sharma, MD (Pathology)
+Reg No: MCI-981245
+================================================================================

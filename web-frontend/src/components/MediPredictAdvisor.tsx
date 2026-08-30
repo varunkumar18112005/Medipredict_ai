@@ -74,7 +74,7 @@ export default function MediPredictAdvisor() {
     }
     
     const diseaseName = assessment.diseaseType.replace("_", " ");
-    return `### Hello! I am your MediPredict Advisor. 👋\n\nI have automatically loaded your latest **${diseaseName} Assessment** from ${new Date(assessment.createdAt).toLocaleDateString()}.\n\n* **Risk Level:** ${assessment.riskLevel}\n* **Risk Score:** ${assessment.riskScore}%\n\nHow can I help you explain these results, suggest dietary plans, or prepare questions for your doctor?`;
+    return `### Hello! I am your MediPredict Advisor. 👋\n\nI have automatically loaded your latest **${diseaseName} Assessment** from ${new Date(assessment.createdAt).toLocaleDateString()}.\n\n* **Risk Level:** ${assessment.riskLevel}\n* **Risk Score:** ${Number(assessment.riskScore).toFixed(1)}%\n\nHow can I help you explain these results, suggest dietary plans, or prepare questions for your doctor?`;
   };
 
   const handleSend = async (textToSend: string) => {

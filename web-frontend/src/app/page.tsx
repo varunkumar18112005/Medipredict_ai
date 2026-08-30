@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import DepthCarousel from "../components/DepthCarousel";
+import "../components/DepthCarousel.css";
 
 // ── Light Theme Ambient Canvas Background ──────────────────────────────────────
 function LightMedicalBackgroundCanvas() {
@@ -567,7 +569,7 @@ export default function LuxuriousLightMedicalLandingPage() {
             {[
               { num: "01", title: "Select Disease Category", desc: "Choose from 8 specialized diagnostic categories including Cardio, Renal, and Endocrine." },
               { num: "02", title: "View Required Checkups", desc: "Inspect specific biomarker tests needed for an accurate clinical risk evaluation." },
-              { num: "03", title: "Upload Lab Reports", desc: "Upload PDF or image test reports directly into our secure processing pipeline." },
+              { num: "03", title: "Upload Lab Reports", desc: "Upload PDF or image test reports directly into our secure processing system." },
               { num: "04", title: "Automated OCR Extraction", desc: "PyTesseract OCR scans and extracts laboratory values automatically into inputs." },
               { num: "05", title: "Predict Disease Risk", desc: "ML microservices calculate your personalized risk probability score instantly." },
               { num: "06", title: "Receive Recommendations", desc: "Get tailored dietary, physical activity, and clinical advice." },
@@ -587,7 +589,7 @@ export default function LuxuriousLightMedicalLandingPage() {
       {/* ── Section 4: Core Features ────────────────────────────────────────── */}
       <section id="features" style={{ padding: "90px 24px", background: "#FFFFFF" }}>
         <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "50px" }}>
+          <div style={{ textAlign: "center", marginBottom: "30px" }}>
             <span style={{ fontSize: "0.8rem", color: "#2EBD85", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase" }}>
               PLATFORM CAPABILITIES
             </span>
@@ -596,28 +598,37 @@ export default function LuxuriousLightMedicalLandingPage() {
             </h2>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "28px" }}>
-            {[
-              { icon: "🩺", title: "Disease-Specific Health Assessments", desc: "Tailored diagnostic inputs for 8 distinct chronic disease categories." },
-              { icon: "📄", title: "Intelligent OCR Report Analysis", desc: "Extract unstructured laboratory PDF data into digital structured formats." },
-              { icon: "🤖", title: "AI Disease Risk Prediction", desc: "Machine learning probability scoring backed by feature impact models." },
-              { icon: "💡", title: "Personalized Health Suggestions", desc: "Actionable lifestyle, dietary, and medical follow-up guidelines." },
-              { icon: "📈", title: "Interactive Health Analytics", desc: "Longitudinal multi-line trajectory graphs tracking risk scores over time." },
-              { icon: "📍", title: "Hospital Locator", desc: "Geospatial discovery of hospitals and diagnostic clinics within 10km." },
-              { icon: "🎟️", title: "Appointment Booking", desc: "Real-time consultation scheduling for hospital visits or telehealth." },
-              { icon: "🗂️", title: "Medical History Tracking", desc: "Comprehensive patient logs and exportable clinical summary reports." },
-              { icon: "🔐", title: "Secure User Accounts", desc: "Encrypted authentication with Spring Security and JWT bearer tokens." },
-            ].map((feature, idx) => (
-              <div key={idx} className="med-card" style={{ padding: "28px", display: "flex", gap: "18px", alignItems: "flex-start" }}>
-                <div style={{ width: "48px", height: "48px", borderRadius: "12px", background: "#E3F2FD", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.4rem", flexShrink: 0 }}>
-                  {feature.icon}
-                </div>
-                <div>
-                  <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#1E293B" }}>{feature.title}</h3>
-                  <p style={{ fontSize: "0.85rem", color: "#64748B", marginTop: "6px", lineHeight: 1.5 }}>{feature.desc}</p>
-                </div>
-              </div>
-            ))}
+          <div style={{ height: "460px", position: "relative", width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <DepthCarousel
+              items={[
+                { icon: "🩺", title: "Disease-Specific Health Assessments", desc: "Tailored diagnostic inputs for 8 distinct chronic disease categories." },
+                { icon: "📄", title: "Intelligent OCR Report Analysis", desc: "Extract unstructured laboratory PDF data into digital structured formats." },
+                { icon: "🤖", title: "AI Disease Risk Prediction", desc: "Machine learning probability scoring backed by feature impact models." },
+                { icon: "💡", title: "Personalized Health Suggestions", desc: "Actionable lifestyle, dietary, and medical follow-up guidelines." },
+                { icon: "📈", title: "Interactive Health Analytics", desc: "Longitudinal multi-line trajectory graphs tracking risk scores over time." },
+                { icon: "📍", title: "Hospital Locator", desc: "Geospatial discovery of hospitals and diagnostic clinics within 10km." },
+                { icon: "🎟️", title: "Appointment Booking", desc: "Real-time consultation scheduling for hospital visits or telehealth." },
+                { icon: "🗂️", title: "Medical History Tracking", desc: "Comprehensive patient logs and exportable clinical summary reports." },
+                { icon: "🔐", title: "Secure User Accounts", desc: "Encrypted authentication with Spring Security and JWT bearer tokens." },
+              ]}
+              cardWidth={340}
+              cardHeight={250}
+              radius={20}
+              tint="#1e88e5"
+              depth={220}
+              spread={90}
+              tilt={22}
+              tiltDirection="right"
+              perspective={1400}
+              visibleCards={4}
+              falloff={0.18}
+              blur={5}
+              autoplay={true}
+              autoplayDelay={3200}
+              loop={true}
+              showControls={true}
+              showIndicators={true}
+            />
           </div>
         </div>
       </section>
@@ -636,7 +647,7 @@ export default function LuxuriousLightMedicalLandingPage() {
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px" }}>
             {[
-              { step: "Step 1", title: "Choose Disease", desc: "Select target disease pipeline", icon: "🎯" },
+              { step: "Step 1", title: "Choose Disease", desc: "Select target disease assessment", icon: "🎯" },
               { step: "Step 2", title: "Complete Checkups", desc: "Review required medical tests", icon: "📋" },
               { step: "Step 3", title: "Upload Report", desc: "Upload report or enter test values", icon: "📤" },
               { step: "Step 4", title: "AI Risk Prediction", desc: "ML microservice calculates score", icon: "⚡" },
@@ -658,7 +669,7 @@ export default function LuxuriousLightMedicalLandingPage() {
         <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "50px" }}>
             <span style={{ fontSize: "0.8rem", color: "#2EBD85", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase" }}>
-              PREDICTIVE PIPELINES
+              PREDICTIVE MODELS
             </span>
             <h2 style={{ fontSize: "2.4rem", fontWeight: 800, color: "#1E293B", marginTop: "6px" }}>
               Supported Disease Categories
