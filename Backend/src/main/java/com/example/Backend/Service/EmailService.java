@@ -86,17 +86,17 @@ public class EmailService {
             log.warn("[OTP SUBJECT]: {}", subject);
             log.warn("[OTP EMAIL CONTENT]:\n{}", text);
             log.warn("==================================================");
-            log.warn("Email delivery to {} could not be completed via API/SMTP providers (e.g., unverified domain on Resend test tier or SMTP port blocked). OTP saved to server logs above.", recipient);
+            log.warn("Email delivery to {} could not be completed via provider '{}'. OTP saved to server logs above.", recipient, selectedProvider);
         }
     }
 
     private boolean sendWithBrevo(String sender, String recipient, String subject, String text) {
         if (isBlank(brevoApiKey)) {
-            log.warn("BREVO_API_KEY is not configured or blank.");
+            log.warn("Brevo API Key is not configured or blank. Please check BREVO_API_KEY on Render.");
             return false;
         }
 
-        log.info("Attempting to send email via Brevo API to {}", recipient);
+        log.info("Sending email via Brevo API to {} (Sender: {})", recipient, sender);
 
         String payload = String.format(
                 "{\"sender\":{\"name\":\"MediPredict AI\",\"email\":\"%s\"},\"to\":[{\"email\":\"%s\"}],\"subject\":\"%s\",\"textContent\":\"%s\"}",
