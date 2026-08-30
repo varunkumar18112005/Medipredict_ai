@@ -134,18 +134,19 @@ public class EmailService {
                     .uri(URI.create(endpoint))
                     .header(authHeader, authValue)
                     .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(payload))
                     .timeout(REQUEST_TIMEOUT)
                     .build();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                log.info("{} accepted transactional email for {}", providerName, recipient);
+                log.info("✅ {} accepted transactional email for {}", providerName, recipient);
                 return true;
             }
-            log.warn("{} rejected transactional email for {} (HTTP {}): {}", providerName, recipient,
-                    response.statusCode(), concise(response.body()));
+            log.error("❌ {} rejected transactional email for {} (HTTP {}): {}", providerName, recipient,
+                    response.statusCode(), response.body());
         } catch (Exception ex) {
-            log.warn("{} email request failed for {}: {}", providerName, recipient, ex.getMessage());
+            log.error("❌ {} email request failed for {}: {}", providerName, recipient, ex.getMessage(), ex);
         }
         return false;
     }
